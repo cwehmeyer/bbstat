@@ -49,11 +49,23 @@ def test_compute_weighted_std(
     np.testing.assert_allclose(actual, expected)
 
 
+@pytest.mark.parametrize(
+    "use_sorter",
+    [
+        pytest.param(True),
+        pytest.param(False),
+    ],
+)
 def test_compute_weighted_median(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
+    use_sorter: bool,
 ) -> None:
-    actual = compute_weighted_median(data=data, weights=weights)
+    actual = compute_weighted_median(
+        data=data,
+        weights=weights,
+        sorter=np.argsort(data) if use_sorter else None,
+    )
     expected = np.median(data)
     np.testing.assert_allclose(actual, expected)
 
@@ -66,15 +78,24 @@ def test_compute_weighted_median(
         pytest.param(0.99),
     ],
 )
+@pytest.mark.parametrize(
+    "use_sorter",
+    [
+        pytest.param(True),
+        pytest.param(False),
+    ],
+)
 def test_compute_weighted_quantile(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
     quantile: float,
+    use_sorter: bool,
 ) -> None:
     actual = compute_weighted_quantile(
         data=data,
         weights=weights,
         quantile=quantile,
+        sorter=np.argsort(data) if use_sorter else None,
     )
     expected = np.quantile(data, quantile)
     np.testing.assert_allclose(actual, expected)
@@ -88,15 +109,24 @@ def test_compute_weighted_quantile(
         pytest.param(0.99),
     ],
 )
+@pytest.mark.parametrize(
+    "use_sorter",
+    [
+        pytest.param(True),
+        pytest.param(False),
+    ],
+)
 def test_compute_weighted_percentile(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
     percentile: float,
+    use_sorter: bool,
 ) -> None:
     actual = compute_weighted_percentile(
         data=data,
         weights=weights,
         percentile=percentile,
+        sorter=np.argsort(data) if use_sorter else None,
     )
     expected = np.percentile(data, percentile)
     np.testing.assert_allclose(actual, expected)
