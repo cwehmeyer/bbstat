@@ -1,0 +1,2 @@
+# bbstat
+Bayesian bootstrap.
