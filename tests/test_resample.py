@@ -1,8 +1,9 @@
+from typing import Optional
+
+import numpy as np
 import pytest
 
 from bbstat.resample import Resample
-import numpy as np
-from typing import Optional
 
 
 @pytest.mark.parametrize(
