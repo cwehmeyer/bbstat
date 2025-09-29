@@ -9,12 +9,18 @@ from bbstat.statistics import (
     compute_weighted_quantile,
     compute_weighted_std,
     compute_weighted_variance,
+    compute_weighted_correlation,
 )
 
 
 @pytest.fixture(scope="module")
 def data() -> NDArray[np.floating]:
     return np.random.normal(loc=0.0, scale=1.0, size=101)
+
+
+@pytest.fixture(scope="module")
+def data_2(data: NDArray[np.floating]) -> NDArray[np.floating]:
+    return data + np.random.uniform(-1e-2, 1e-2, data.shape)
 
 
 @pytest.fixture(scope="module")
@@ -46,6 +52,18 @@ def test_compute_weighted_std(
 ) -> None:
     actual = compute_weighted_std(data=data, weights=weights)
     expected = np.std(data, ddof=1)
+    np.testing.assert_allclose(actual, expected)
+
+
+def test_compute_weighted_correlation(
+    data: NDArray[np.floating],
+    data_2: NDArray[np.floating],
+    weights: NDArray[np.floating],
+) -> None:
+    actual = compute_weighted_correlation(data_1=data, data_2=data_2, weights=weights)
+    array_1 = (data - np.mean(data)) / np.std(data, ddof=1)
+    array_2 = (data_2 - np.mean(data_2)) / np.std(data_2, ddof=1)
+    expected = np.mean(array_1 * array_2)
     np.testing.assert_allclose(actual, expected)
 
 

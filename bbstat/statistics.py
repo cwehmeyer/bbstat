@@ -15,8 +15,10 @@ def compute_weighted_mean(
 def compute_weighted_variance(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
+    weighted_mean: Optional[float] = None,
 ) -> float:
-    weighted_mean = compute_weighted_mean(data=data, weights=weights)
+    if weighted_mean is None:
+        weighted_mean = compute_weighted_mean(data=data, weights=weights)
     numerator = compute_weighted_mean(
         data=(data - weighted_mean) ** 2,
         weights=weights,
@@ -28,8 +30,13 @@ def compute_weighted_variance(
 def compute_weighted_std(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
+    weighted_mean: Optional[float] = None,
 ) -> float:
-    weighted_variance = compute_weighted_variance(data=data, weights=weights)
+    weighted_variance = compute_weighted_variance(
+        data=data,
+        weights=weights,
+        weighted_mean=weighted_mean,
+    )
     return math.sqrt(weighted_variance)
 
 
@@ -82,3 +89,25 @@ def compute_weighted_median(
         quantile=0.5,
         sorter=sorter,
     )
+
+
+def compute_weighted_correlation(
+    data_1: NDArray[np.floating],
+    data_2: NDArray[np.floating],
+    weights: NDArray[np.floating],
+) -> float:
+    weighted_mean_1 = compute_weighted_mean(data=data_1, weights=weights)
+    weighted_mean_2 = compute_weighted_mean(data=data_2, weights=weights)
+    weighted_std_1 = compute_weighted_std(
+        data=data_1,
+        weights=weights,
+        weighted_mean=weighted_mean_1,
+    )
+    weighted_std_2 = compute_weighted_std(
+        data=data_2,
+        weights=weights,
+        weighted_mean=weighted_mean_2,
+    )
+    array_1 = (data_1 - weighted_mean_1) / weighted_std_1
+    array_2 = (data_2 - weighted_mean_2) / weighted_std_2
+    return compute_weighted_mean(data=array_1 * array_2, weights=weights)
