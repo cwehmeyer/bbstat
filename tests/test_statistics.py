@@ -9,7 +9,7 @@ from bbstat.statistics import (
     compute_weighted_quantile,
     compute_weighted_std,
     compute_weighted_variance,
-    compute_weighted_correlation,
+    compute_weighted_pearson_dependency,
 )
 
 
@@ -55,12 +55,16 @@ def test_compute_weighted_std(
     np.testing.assert_allclose(actual, expected)
 
 
-def test_compute_weighted_correlation(
+def test_compute_weighted_pearson_dependency(
     data: NDArray[np.floating],
     data_2: NDArray[np.floating],
     weights: NDArray[np.floating],
 ) -> None:
-    actual = compute_weighted_correlation(data_1=data, data_2=data_2, weights=weights)
+    actual = compute_weighted_pearson_dependency(
+        data_1=data,
+        data_2=data_2,
+        weights=weights,
+    )
     array_1 = (data - np.mean(data)) / np.std(data, ddof=1)
     array_2 = (data_2 - np.mean(data_2)) / np.std(data_2, ddof=1)
     expected = np.mean(array_1 * array_2)

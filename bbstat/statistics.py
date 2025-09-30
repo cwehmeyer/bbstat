@@ -3,6 +3,7 @@ import math
 import numpy as np
 from numpy.typing import NDArray
 from typing import Optional
+from scipy.stats import rankdata
 
 
 def compute_weighted_mean(
@@ -91,7 +92,7 @@ def compute_weighted_median(
     )
 
 
-def compute_weighted_correlation(
+def compute_weighted_pearson_dependency(
     data_1: NDArray[np.floating],
     data_2: NDArray[np.floating],
     weights: NDArray[np.floating],
@@ -111,3 +112,17 @@ def compute_weighted_correlation(
     array_1 = (data_1 - weighted_mean_1) / weighted_std_1
     array_2 = (data_2 - weighted_mean_2) / weighted_std_2
     return compute_weighted_mean(data=array_1 * array_2, weights=weights)
+
+
+def compute_weighted_spearman_dependency(
+    data_1: NDArray[np.floating],
+    data_2: NDArray[np.floating],
+    weights: NDArray[np.floating],
+) -> float:
+    ranks_1 = rankdata(data_1)
+    ranks_2 = rankdata(data_2)
+    return compute_weighted_pearson_dependency(
+        data_1=ranks_1,
+        data_2=ranks_2,
+        weights=weights,
+    )
