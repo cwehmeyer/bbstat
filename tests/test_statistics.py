@@ -5,11 +5,12 @@ from numpy.typing import NDArray
 from bbstat.statistics import (
     compute_weighted_mean,
     compute_weighted_median,
+    compute_weighted_pearson_dependency,
     compute_weighted_percentile,
     compute_weighted_quantile,
     compute_weighted_std,
+    compute_weighted_sum,
     compute_weighted_variance,
-    compute_weighted_pearson_dependency,
 )
 
 
@@ -34,6 +35,15 @@ def test_compute_weighted_mean(
 ) -> None:
     actual = compute_weighted_mean(data=data, weights=weights)
     expected = np.mean(data)
+    np.testing.assert_allclose(actual, expected)
+
+
+def test_compute_weighted_sum(
+    data: NDArray[np.floating],
+    weights: NDArray[np.floating],
+) -> None:
+    actual = compute_weighted_sum(data=data, weights=weights)
+    expected = np.sum(data)
     np.testing.assert_allclose(actual, expected)
 
 

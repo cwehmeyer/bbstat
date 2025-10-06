@@ -13,6 +13,13 @@ def compute_weighted_mean(
     return np.sum(data * weights).item()
 
 
+def compute_weighted_sum(
+    data: NDArray[np.floating],
+    weights: NDArray[np.floating],
+) -> float:
+    return np.sum(data * weights).item() * len(weights)
+
+
 def compute_weighted_variance(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
