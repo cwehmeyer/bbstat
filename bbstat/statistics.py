@@ -6,44 +6,84 @@ from typing import Optional
 from scipy.stats import rankdata
 
 
+def compute_weighted_aggregate(
+    data: NDArray[np.floating],
+    weights: NDArray[np.floating],
+    factor: Optional[float] = None,
+) -> NDArray[np.floating]:
+    """Compute a weighted aggregate of data.
+
+    This is dot-product betweeen weights and data.
+
+    Parameters
+    ----------
+    data: numpy.array(shape=(n,))
+        Data points to resample and aggregate.
+    weights: numpy.array(shape=(n_data,))
+        Weights for resampling, either via block or loop.
+    factor: Optional[int], default is None
+        Rescaling for the aggregation, used to compute means or sums.
+
+    Returns
+    -------
+    float
+        Reweighted and aggregated (and optionally rescaled) data.
+    """
+    if data.ndim != 1:
+        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
+    if weights.ndim != 1:
+        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
+    if weights.shape != data.shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
+            "must be equal."
+        )
+    aggregate = np.dot(weights, data)
+    if factor is not None:
+        aggregate *= factor
+    return aggregate.item()
+
+
 def compute_weighted_mean(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
 ) -> float:
-    return np.sum(data * weights).item()
+    return compute_weighted_aggregate(data=data, weights=weights, factor=None)
 
 
 def compute_weighted_sum(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
 ) -> float:
-    return np.sum(data * weights).item() * len(weights)
+    return compute_weighted_aggregate(data=data, weights=weights, factor=len(data))
 
 
 def compute_weighted_variance(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
     weighted_mean: Optional[float] = None,
+    ddof: int = 0,
 ) -> float:
     if weighted_mean is None:
         weighted_mean = compute_weighted_mean(data=data, weights=weights)
-    numerator = compute_weighted_mean(
-        data=(data - weighted_mean) ** 2,
+    return compute_weighted_aggregate(
+        data=np.power(data - weighted_mean, 2.0),
         weights=weights,
+        factor=len(data) / (len(data) - ddof),
     )
-    denominator = 1.0 - np.sum(weights**2)  # Assumes normalised weights!
-    return (numerator / denominator).item()
 
 
 def compute_weighted_std(
     data: NDArray[np.floating],
     weights: NDArray[np.floating],
     weighted_mean: Optional[float] = None,
+    ddof: int = 0,
 ) -> float:
     weighted_variance = compute_weighted_variance(
         data=data,
         weights=weights,
         weighted_mean=weighted_mean,
+        ddof=ddof,
     )
     return math.sqrt(weighted_variance)
 
@@ -103,6 +143,7 @@ def compute_weighted_pearson_dependency(
     data_1: NDArray[np.floating],
     data_2: NDArray[np.floating],
     weights: NDArray[np.floating],
+    ddof: int = 0,
 ) -> float:
     weighted_mean_1 = compute_weighted_mean(data=data_1, weights=weights)
     weighted_mean_2 = compute_weighted_mean(data=data_2, weights=weights)
@@ -110,11 +151,13 @@ def compute_weighted_pearson_dependency(
         data=data_1,
         weights=weights,
         weighted_mean=weighted_mean_1,
+        ddof=ddof,
     )
     weighted_std_2 = compute_weighted_std(
         data=data_2,
         weights=weights,
         weighted_mean=weighted_mean_2,
+        ddof=ddof,
     )
     array_1 = (data_1 - weighted_mean_1) / weighted_std_1
     array_2 = (data_2 - weighted_mean_2) / weighted_std_2
