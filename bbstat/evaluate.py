@@ -35,3 +35,6 @@ class BootstrapResult:
 
     def __str__(self) -> str:
         return f"(mean={self.mean}, ci={self.ci}, coverage={self.coverage}. n_boot={self.n_boot})"
+
+    def credibility_interval(self, coverage: float) -> Tuple[float, float]:
+        return credibility_interval(estimates=self.estimates, coverage=coverage)

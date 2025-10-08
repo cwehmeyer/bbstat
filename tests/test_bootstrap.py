@@ -1,0 +1,94 @@
+from typing import Optional
+
+import numpy as np
+import pytest
+from numpy.typing import NDArray
+
+from bbstat.bootstrap import bootstrap
+from bbstat.statistics import compute_weighted_aggregate
+
+
+@pytest.fixture(scope="module")
+def data_constant() -> NDArray[np.floating]:
+    return np.ones(shape=(101,))
+
+
+@pytest.fixture(scope="module")
+def data_random() -> NDArray[np.floating]:
+    return np.random.default_rng(1).normal(size=1000)
+
+
+@pytest.mark.parametrize(
+    "n_boot",
+    [
+        pytest.param(10),
+        pytest.param(100),
+    ],
+)
+@pytest.mark.parametrize(
+    "coverage",
+    [
+        pytest.param(0.1),
+        pytest.param(0.9),
+    ],
+)
+@pytest.mark.parametrize(
+    "seed",
+    [
+        pytest.param(None),
+        pytest.param(1),
+    ],
+)
+@pytest.mark.parametrize(
+    "blocksize",
+    [
+        pytest.param(None),
+        pytest.param(1),
+        pytest.param(3),
+    ],
+)
+def test_bootstrap_constant(
+    data_constant: NDArray[np.floating],
+    n_boot: int,
+    coverage: float,
+    seed: Optional[int],
+    blocksize: Optional[int],
+) -> None:
+    bootstrap_result = bootstrap(
+        data=data_constant,
+        statistic_fn=compute_weighted_aggregate,
+        n_boot=n_boot,
+        coverage=coverage,
+        seed=seed,
+        blocksize=blocksize,
+    )
+    assert bootstrap_result.n_boot == n_boot
+    assert len(bootstrap_result.estimates) == n_boot
+    assert bootstrap_result.coverage == coverage
+    assert bootstrap_result.ci[0] <= bootstrap_result.ci[1]
+    np.testing.assert_allclose(bootstrap_result.mean, 1.0)
+    np.testing.assert_allclose(bootstrap_result.ci, 1.0)
+    np.testing.assert_allclose(bootstrap_result.estimates, 1.0)
+
+
+def test_bootstrap_random(data_random: NDArray[np.floating]) -> None:
+    bootstrap_result = bootstrap(
+        data=data_random,
+        statistic_fn=compute_weighted_aggregate,
+        seed=1,
+    )
+    assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
+    np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=0.07)
+    np.testing.assert_allclose(bootstrap_result.ci, (-0.05, 0.05), atol=0.07)
+
+
+def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None:
+    bootstrap_result = bootstrap(
+        data=data_random,
+        statistic_fn=compute_weighted_aggregate,
+        seed=1,
+        factor=len(data_random),
+    )
+    assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
+    np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=70.0)
+    np.testing.assert_allclose(bootstrap_result.ci, (-50.0, 50.0), atol=70.0)
