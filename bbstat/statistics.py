@@ -1,16 +1,29 @@
 import math
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
-from typing import Optional, Tuple
 from scipy.stats import rankdata
+
+FArray = NDArray[np.floating]
+IArray = NDArray[np.integer]
+FFArray = Tuple[FArray, FArray]
+IFArray = Tuple[IArray, FArray]
+StatisticFunctionData_T = Union[
+    FArray,
+    FFArray,
+    IFArray,
+    List[FArray],
+    List[Union[IArray, FArray]],
+]
+StatisticFunction_T = Callable[StatisticFunctionData_T, float]
 
 
 def compute_weighted_aggregate(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
     factor: Optional[float] = None,
-) -> NDArray[np.floating]:
+) -> float:
     """Compute a weighted aggregate of data.
 
     This is dot-product betweeen weights and data.
@@ -45,22 +58,22 @@ def compute_weighted_aggregate(
 
 
 def compute_weighted_mean(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
 ) -> float:
     return compute_weighted_aggregate(data=data, weights=weights, factor=None)
 
 
 def compute_weighted_sum(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
 ) -> float:
     return compute_weighted_aggregate(data=data, weights=weights, factor=len(data))
 
 
 def compute_weighted_variance(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
     weighted_mean: Optional[float] = None,
     ddof: int = 0,
 ) -> float:
@@ -74,8 +87,8 @@ def compute_weighted_variance(
 
 
 def compute_weighted_std(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
     weighted_mean: Optional[float] = None,
     ddof: int = 0,
 ) -> float:
@@ -89,10 +102,10 @@ def compute_weighted_std(
 
 
 def compute_weighted_quantile(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
     quantile: float,
-    sorter: Optional[NDArray[np.integer]] = None,
+    sorter: Optional[IArray] = None,
 ) -> float:
     if sorter is None:
         sorter = np.argsort(data)
@@ -113,8 +126,8 @@ def compute_weighted_quantile(
 
 
 def compute_weighted_percentile(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
     percentile: float,
     sorter: Optional[NDArray[np.integer]] = None,
 ) -> float:
@@ -127,8 +140,8 @@ def compute_weighted_percentile(
 
 
 def compute_weighted_median(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
     sorter: Optional[NDArray[np.integer]] = None,
 ) -> float:
     return compute_weighted_quantile(
@@ -140,8 +153,8 @@ def compute_weighted_median(
 
 
 def compute_weighted_pearson_dependency(
-    data: Tuple[NDArray[np.floating], NDArray[np.floating]],
-    weights: NDArray[np.floating],
+    data: FFArray,
+    weights: FArray,
     ddof: int = 0,
 ) -> float:
     data_1, data_2 = data
@@ -165,8 +178,8 @@ def compute_weighted_pearson_dependency(
 
 
 def compute_weighted_spearman_dependency(
-    data: Tuple[NDArray[np.floating], NDArray[np.floating]],
-    weights: NDArray[np.floating],
+    data: FFArray,
+    weights: FArray,
     ddof: int = 0,
 ) -> float:
     data_1, data_2 = data
@@ -176,4 +189,28 @@ def compute_weighted_spearman_dependency(
         data=(ranks_1, ranks_2),
         weights=weights,
         ddof=ddof,
+    )
+
+
+def compute_weighted_eta_square_dependency(
+    data: IFArray,
+    weights: FArray,
+    ddof: int = 0,
+) -> float:
+    data_cat, data_num = data
+    mean_sample = compute_weighted_mean(data=data_num, weights=weights)
+    group_variance_sum = 0.0
+    for value in np.unique(data_cat):
+        subset = data_cat == value
+        group_weight = weights[subset].sum()
+        mean_group = compute_weighted_aggregate(
+            data=data_num[subset],
+            weights=weights[subset],
+            factor=1.0 / group_weight,
+        )
+        group_variance_sum += group_weight * (mean_group - mean_sample) ** 2
+    return group_variance_sum / compute_weighted_variance(
+        data=data_num,
+        weights=weights,
+        ddof=0,
     )
