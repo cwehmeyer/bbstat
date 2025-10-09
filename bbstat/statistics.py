@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 from numpy.typing import NDArray
-from typing import Optional
+from typing import Optional, Tuple
 from scipy.stats import rankdata
 
 
@@ -140,11 +140,11 @@ def compute_weighted_median(
 
 
 def compute_weighted_pearson_dependency(
-    data_1: NDArray[np.floating],
-    data_2: NDArray[np.floating],
+    data: Tuple[NDArray[np.floating], NDArray[np.floating]],
     weights: NDArray[np.floating],
     ddof: int = 0,
 ) -> float:
+    data_1, data_2 = data
     weighted_mean_1 = compute_weighted_mean(data=data_1, weights=weights)
     weighted_mean_2 = compute_weighted_mean(data=data_2, weights=weights)
     weighted_std_1 = compute_weighted_std(
@@ -165,14 +165,15 @@ def compute_weighted_pearson_dependency(
 
 
 def compute_weighted_spearman_dependency(
-    data_1: NDArray[np.floating],
-    data_2: NDArray[np.floating],
+    data: Tuple[NDArray[np.floating], NDArray[np.floating]],
     weights: NDArray[np.floating],
+    ddof: int = 0,
 ) -> float:
+    data_1, data_2 = data
     ranks_1 = rankdata(data_1)
     ranks_2 = rankdata(data_2)
     return compute_weighted_pearson_dependency(
-        data_1=ranks_1,
-        data_2=ranks_2,
+        data=(ranks_1, ranks_2),
         weights=weights,
+        ddof=ddof,
     )

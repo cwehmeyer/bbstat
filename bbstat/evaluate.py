@@ -26,7 +26,7 @@ class BootstrapResult:
     estimates: Optional[NDArray[np.floating]]
 
     def __post_init__(self):
-        self.mean = np.mean(self.estimates)
+        self.mean = np.mean(self.estimates).item()
         self.ci = credibility_interval(
             estimates=self.estimates,
             coverage=self.coverage,
@@ -34,7 +34,10 @@ class BootstrapResult:
         self.n_boot = len(self.estimates)
 
     def __str__(self) -> str:
-        return f"(mean={self.mean}, ci={self.ci}, coverage={self.coverage}. n_boot={self.n_boot})"
+        return f"BootstrapResult(mean={self.mean}, ci={self.ci}, coverage={self.coverage}, n_boot={self.n_boot})"
+    
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def credibility_interval(self, coverage: float) -> Tuple[float, float]:
         return credibility_interval(estimates=self.estimates, coverage=coverage)

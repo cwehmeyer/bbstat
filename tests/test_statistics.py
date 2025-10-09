@@ -139,8 +139,7 @@ def test_compute_weighted_pearson_dependency(
     ddof: int,
 ) -> None:
     actual = compute_weighted_pearson_dependency(
-        data_1=data_random,
-        data_2=data_dependent,
+        data=(data_random, data_dependent),
         weights=weights_constant,
         ddof=ddof,
     )

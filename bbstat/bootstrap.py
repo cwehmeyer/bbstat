@@ -49,7 +49,7 @@ def bootstrap(
             statistic_fn(data=data, weights=weights, **kwargs)
             for weights in resample(
                 n_boot=n_boot,
-                n_data=len(data),
+                n_data=n_data,
                 seed=seed,
                 blocksize=blocksize,
             )
