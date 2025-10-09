@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 import pytest
 from numpy.typing import NDArray
 
 from bbstat.bootstrap import bootstrap
+from bbstat.evaluate import BootstrapResult
 from bbstat.statistics import compute_weighted_aggregate
 
 
@@ -80,6 +81,32 @@ def test_bootstrap_random(data_random: NDArray[np.floating]) -> None:
     assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
     np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=0.07)
     np.testing.assert_allclose(bootstrap_result.ci, (-0.05, 0.05), atol=0.07)
+
+
+@pytest.mark.parametrize(
+    "name, kwargs",
+    [
+        pytest.param("mean", {}),
+        pytest.param("median", {}),
+        pytest.param("percentile", {"percentile": 50}),
+        pytest.param("quantile", {"quantile": 0.5}),
+        pytest.param("std", {}),
+        pytest.param("sum", {}),
+        pytest.param("variance", {}),
+    ],
+)
+def test_bootstrap_random_single_array(
+    data_random: NDArray[np.floating],
+    name: str,
+    kwargs: Dict[str, Any],
+) -> None:
+    bootstrap_result = bootstrap(
+        data=data_random,
+        statistic_fn=name,
+        seed=1,
+        **kwargs,
+    )
+    assert isinstance(bootstrap_result, BootstrapResult)
 
 
 def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None:
