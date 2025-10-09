@@ -49,6 +49,8 @@ def test_bootstrap_result(
     assert np.all(actual.estimates == estimates)
     np.testing.assert_allclose(actual.mean, 0.5)
     np.testing.assert_allclose(actual.ci, expected_ci)
+    lo, hi = actual.ci
+    assert lo <= actual.mean <= hi
 
 
 @pytest.mark.parametrize(

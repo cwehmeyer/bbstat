@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass, field
 from typing import Optional, Tuple
 
@@ -34,8 +35,13 @@ class BootstrapResult:
         self.n_boot = len(self.estimates)
 
     def __str__(self) -> str:
-        return f"BootstrapResult(mean={self.mean}, ci={self.ci}, coverage={self.coverage}, n_boot={self.n_boot})"
-    
+        width = self.ci[1] - self.ci[0]
+        ndigits = 0 if width == 0 else int(2 - math.floor(math.log10(abs(width))) - 1)
+        mean = round(number=self.mean, ndigits=ndigits)
+        lo = round(number=self.ci[0], ndigits=ndigits)
+        hi = round(number=self.ci[1], ndigits=ndigits)
+        return f"BootstrapResult(mean={mean}, ci={(lo, hi)}, coverage={self.coverage}, n_boot={self.n_boot})"
+
     def __repr__(self) -> str:
         return self.__str__()
 
