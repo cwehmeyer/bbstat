@@ -1,0 +1,20 @@
+[project]
+name = "bbstat"
+version = "0.1.0"
+authors = [{ name="Chris Wehmeyer", email="wehmeyer.chris@gmail.com" }]
+description = "Tools for Bayesian bootstrapping."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["numpy >= 1.21", "scipy >= 1.11"]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+test = [
+    "pytest >= 7.0",
+    "pytest-cov",
+    "tox",
+]

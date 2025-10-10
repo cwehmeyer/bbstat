@@ -69,6 +69,27 @@ def test_compute_weighted_aggregate(
     np.testing.assert_allclose(actual, expected)
 
 
+@pytest.mark.parametrize(
+    "data, weights",
+    [
+        pytest.param(np.array(1), np.array([0.5, 0.5])),
+        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
+        pytest.param(np.array([0.5, 0.5]), np.array(1)),
+        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
+        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
+    ],
+)
+def test_compute_weighted_aggregate_fail(
+    data: NDArray[np.floating],
+    weights: NDArray[np.floating],
+) -> None:
+    with pytest.raises(ValueError):
+        _ = compute_weighted_aggregate(
+            data=data,
+            weights=weights,
+        )
+
+
 def test_compute_weighted_mean_0(
     data_random: NDArray[np.floating],
     weights_constant: NDArray[np.floating],
@@ -201,6 +222,50 @@ def test_compute_weighted_quantile(
         sorter=np.argsort(data_random) if use_sorter else None,
     )
     expected = np.quantile(data_random, quantile)
+    np.testing.assert_allclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "quantile",
+    [
+        pytest.param(-1),
+        pytest.param(0),
+    ],
+)
+def test_compute_weighted_quantile_underflow(
+    data_random: NDArray[np.floating],
+    weights_constant: NDArray[np.floating],
+    quantile: float,
+) -> None:
+    actual = compute_weighted_quantile(
+        data=data_random,
+        weights=weights_constant,
+        quantile=quantile,
+        sorter=None,
+    )
+    expected = np.min(data_random)
+    np.testing.assert_allclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "quantile",
+    [
+        pytest.param(1),
+        pytest.param(2),
+    ],
+)
+def test_compute_weighted_quantile_overflow(
+    data_random: NDArray[np.floating],
+    weights_constant: NDArray[np.floating],
+    quantile: float,
+) -> None:
+    actual = compute_weighted_quantile(
+        data=data_random,
+        weights=weights_constant,
+        quantile=quantile,
+        sorter=None,
+    )
+    expected = np.max(data_random)
     np.testing.assert_allclose(actual, expected)
 
 

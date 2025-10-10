@@ -70,3 +70,44 @@ def test_bootstrap_result_credibility_interval(
         bootstrap_result.credibility_interval(coverage=coverage),
         expected_ci,
     )
+
+
+@pytest.mark.parametrize(
+    "estimates",
+    [
+        pytest.param(np.array(1)),
+        pytest.param(np.array([[1]])),
+    ],
+)
+def test_credibility_interval_fail_on_ndim(estimates: NDArray[np.floating]) -> None:
+    with pytest.raises(ValueError):
+        _ = credibility_interval(
+            estimates=estimates,
+            coverage=0.87,
+        )
+
+
+@pytest.mark.parametrize(
+    "coverage",
+    [
+        pytest.param(-1),
+        pytest.param(0),
+        pytest.param(1),
+    ],
+)
+def test_credibility_interval_fail_on_coverage(
+    estimates: NDArray[np.floating],
+    coverage: float,
+) -> None:
+    with pytest.raises(ValueError):
+        _ = credibility_interval(
+            estimates=estimates,
+            coverage=coverage,
+        )
+
+
+def test_bootstrap_result_repr() -> None:
+    bootstrap_result = BootstrapResult(estimates=np.array([1, 1, 1]), coverage=0.87)
+    actual = repr(bootstrap_result)
+    expected = "BootstrapResult(mean=1.0, ci=(1.0, 1.0), coverage=0.87, n_boot=3)"
+    assert actual == expected

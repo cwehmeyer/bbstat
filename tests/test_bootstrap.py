@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 from bbstat.bootstrap import bootstrap
 from bbstat.evaluate import BootstrapResult
-from bbstat.statistics import compute_weighted_aggregate
+from bbstat.statistics import StatisticFunctionData_T, compute_weighted_aggregate
 
 
 @pytest.fixture(scope="module")
@@ -109,6 +109,28 @@ def test_bootstrap_random_single_array(
     assert isinstance(bootstrap_result, BootstrapResult)
 
 
+@pytest.mark.parametrize(
+    "name, kwargs",
+    [
+        pytest.param("eta_square_dependency", {}),
+        pytest.param("spearman_dependency", {}),
+        pytest.param("pearson_dependency", {}),
+    ],
+)
+def test_bootstrap_random_two_arrays(
+    data_random: NDArray[np.floating],
+    name: str,
+    kwargs: Dict[str, Any],
+) -> None:
+    bootstrap_result = bootstrap(
+        data=(np.random.choice(3, size=len(data_random)), data_random),
+        statistic_fn=name,
+        seed=1,
+        **kwargs,
+    )
+    assert isinstance(bootstrap_result, BootstrapResult)
+
+
 def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None:
     bootstrap_result = bootstrap(
         data=data_random,
@@ -119,3 +141,28 @@ def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None
     assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
     np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=70.0)
     np.testing.assert_allclose(bootstrap_result.ci, (-50.0, 50.0), atol=70.0)
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        pytest.param(np.array(1)),
+        pytest.param(np.array([[1]])),
+        pytest.param([np.array([1]), np.array([[1]])]),
+        pytest.param([np.array([1]), np.array([1, 1])]),
+    ],
+)
+def test_bootstrap_fail_on_data(data: StatisticFunctionData_T) -> None:
+    with pytest.raises(ValueError):
+        _ = bootstrap(
+            data=data,
+            statistic_fn=compute_weighted_aggregate,
+        )
+
+
+def test_bootstrap_fail_on_statistic_name(data_random: NDArray[np.floating]) -> None:
+    with pytest.raises(ValueError):
+        _ = bootstrap(
+            data=data_random,
+            statistic_fn="undefined function name",
+        )
