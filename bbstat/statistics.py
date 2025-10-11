@@ -1,24 +1,55 @@
 import math
-from typing import Callable, List, Optional, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeAlias,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import rankdata
 
-FArray = NDArray[np.floating]
-IArray = NDArray[np.integer]
-FFArray = Tuple[FArray, FArray]
-IFArray = Tuple[IArray, FArray]
-StatisticFunctionData_T = Union[
+FArray: TypeAlias = NDArray[np.floating]
+IArray: TypeAlias = NDArray[np.integer]
+FFArray: TypeAlias = Tuple[FArray, FArray]
+IFArray: TypeAlias = Tuple[IArray, FArray]
+StatisticFunctionDataInput: TypeAlias = Union[
     FArray,
     FFArray,
     IFArray,
     List[FArray],
     List[Union[IArray, FArray]],
 ]
-StatisticFunction_T = Callable[StatisticFunctionData_T, float]
+
+T = TypeVar("T", bound=StatisticFunctionDataInput, contravariant=True)
 
 
+class StatisticFunction(Protocol[T]):
+    def __call__(self, data: T, weights: FArray, **kwargs: Dict[str, Any]) -> float: ...
+
+
+class RawStatisticFunction(Protocol):
+    def __call__(self, data: Any, weights: FArray, **kwargs: Dict[str, Any]) -> float: ...
+
+
+_REGISTRY: dict[str, RawStatisticFunction] = {}
+
+
+def register_stat(name: str):
+    def decorator(fn: RawStatisticFunction) -> RawStatisticFunction:
+        _REGISTRY[name] = fn
+        return fn
+
+    return decorator
+
+
+@register_stat("aggregate")
 def compute_weighted_aggregate(
     data: FArray,
     weights: FArray,
@@ -57,6 +88,7 @@ def compute_weighted_aggregate(
     return aggregate.item()
 
 
+@register_stat("mean")
 def compute_weighted_mean(
     data: FArray,
     weights: FArray,
@@ -64,6 +96,7 @@ def compute_weighted_mean(
     return compute_weighted_aggregate(data=data, weights=weights, factor=None)
 
 
+@register_stat("sum")
 def compute_weighted_sum(
     data: FArray,
     weights: FArray,
@@ -71,6 +104,7 @@ def compute_weighted_sum(
     return compute_weighted_aggregate(data=data, weights=weights, factor=len(data))
 
 
+@register_stat("variance")
 def compute_weighted_variance(
     data: FArray,
     weights: FArray,
@@ -86,6 +120,7 @@ def compute_weighted_variance(
     )
 
 
+@register_stat("std")
 def compute_weighted_std(
     data: FArray,
     weights: FArray,
@@ -101,6 +136,7 @@ def compute_weighted_std(
     return math.sqrt(weighted_variance)
 
 
+@register_stat("quantile")
 def compute_weighted_quantile(
     data: FArray,
     weights: FArray,
@@ -125,6 +161,7 @@ def compute_weighted_quantile(
     return (s_lo + w * (s_hi - s_lo)).item()
 
 
+@register_stat("percentile")
 def compute_weighted_percentile(
     data: FArray,
     weights: FArray,
@@ -139,6 +176,7 @@ def compute_weighted_percentile(
     )
 
 
+@register_stat("median")
 def compute_weighted_median(
     data: FArray,
     weights: FArray,
@@ -152,6 +190,7 @@ def compute_weighted_median(
     )
 
 
+@register_stat("pearson_dependency")
 def compute_weighted_pearson_dependency(
     data: FFArray,
     weights: FArray,
@@ -177,6 +216,7 @@ def compute_weighted_pearson_dependency(
     return compute_weighted_mean(data=array_1 * array_2, weights=weights)
 
 
+@register_stat("spearman_dependency")
 def compute_weighted_spearman_dependency(
     data: FFArray,
     weights: FArray,
@@ -192,6 +232,7 @@ def compute_weighted_spearman_dependency(
     )
 
 
+@register_stat("eta_square_dependency")
 def compute_weighted_eta_square_dependency(
     data: IFArray,
     weights: FArray,

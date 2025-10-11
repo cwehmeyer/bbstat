@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 from bbstat.bootstrap import bootstrap
 from bbstat.evaluate import BootstrapResult
-from bbstat.statistics import StatisticFunctionData_T, compute_weighted_aggregate
+from bbstat.statistics import StatisticFunctionDataInput, compute_weighted_aggregate
 
 
 @pytest.fixture(scope="module")
@@ -84,7 +84,7 @@ def test_bootstrap_random(data_random: NDArray[np.floating]) -> None:
 
 
 @pytest.mark.parametrize(
-    "name, kwargs",
+    "name, fn_kwargs",
     [
         pytest.param("mean", {}),
         pytest.param("median", {}),
@@ -98,19 +98,19 @@ def test_bootstrap_random(data_random: NDArray[np.floating]) -> None:
 def test_bootstrap_random_single_array(
     data_random: NDArray[np.floating],
     name: str,
-    kwargs: Dict[str, Any],
+    fn_kwargs: Dict[str, Any],
 ) -> None:
     bootstrap_result = bootstrap(
         data=data_random,
         statistic_fn=name,
         seed=1,
-        **kwargs,
+        fn_kwargs=fn_kwargs,
     )
     assert isinstance(bootstrap_result, BootstrapResult)
 
 
 @pytest.mark.parametrize(
-    "name, kwargs",
+    "name, fn_kwargs",
     [
         pytest.param("eta_square_dependency", {}),
         pytest.param("spearman_dependency", {}),
@@ -120,13 +120,13 @@ def test_bootstrap_random_single_array(
 def test_bootstrap_random_two_arrays(
     data_random: NDArray[np.floating],
     name: str,
-    kwargs: Dict[str, Any],
+    fn_kwargs: Dict[str, Any],
 ) -> None:
     bootstrap_result = bootstrap(
         data=(np.random.choice(3, size=len(data_random)), data_random),
         statistic_fn=name,
         seed=1,
-        **kwargs,
+        fn_kwargs=fn_kwargs,
     )
     assert isinstance(bootstrap_result, BootstrapResult)
 
@@ -136,7 +136,7 @@ def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None
         data=data_random,
         statistic_fn=compute_weighted_aggregate,
         seed=1,
-        factor=len(data_random),
+        fn_kwargs={"factor": len(data_random)},
     )
     assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
     np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=70.0)
@@ -152,7 +152,7 @@ def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None
         pytest.param([np.array([1]), np.array([1, 1])]),
     ],
 )
-def test_bootstrap_fail_on_data(data: StatisticFunctionData_T) -> None:
+def test_bootstrap_fail_on_data(data: StatisticFunctionDataInput) -> None:
     with pytest.raises(ValueError):
         _ = bootstrap(
             data=data,

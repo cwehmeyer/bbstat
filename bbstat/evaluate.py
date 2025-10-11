@@ -1,6 +1,6 @@
 import math
 from dataclasses import dataclass, field
-from typing import Optional, Tuple
+from typing import Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,7 +24,7 @@ class BootstrapResult:
     ci: Tuple[float, float] = field(init=False)
     coverage: float
     n_boot: int = field(init=False)
-    estimates: Optional[NDArray[np.floating]]
+    estimates: NDArray[np.floating]
 
     def __post_init__(self):
         self.mean = np.mean(self.estimates).item()
