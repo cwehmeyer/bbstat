@@ -108,6 +108,6 @@ def test_credibility_interval_fail_on_coverage(
 
 def test_bootstrap_result_repr() -> None:
     bootstrap_result = BootstrapResult(estimates=np.array([1, 1, 1]), coverage=0.87)
-    actual = repr(bootstrap_result)
+    actual = str(bootstrap_result)
     expected = "BootstrapResult(mean=1.0, ci=(1.0, 1.0), coverage=0.87, n_boot=3)"
     assert actual == expected
