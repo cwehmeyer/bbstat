@@ -16,5 +16,14 @@ build-backend = "setuptools.build_meta"
 test = [
     "pytest >= 7.0",
     "pytest-cov",
+    "scipy-stubs",
+]
+dev = [
     "tox",
+    "build",
+    "twine",
+    "black",
+    "ruff",
+    "pre-commit",
+    "mypy",
 ]
