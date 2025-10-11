@@ -41,14 +41,62 @@ class RawStatisticFunction(Protocol):
 
 
 class Registry:
+    """
+    A simple registry class for storing and managing statistic functions.
+
+    This class provides a way to register and retrieve statistic functions by name.
+    It includes functionality to add a new function to the registry, access the
+    registered functions by name, and list all registered function names.
+
+    Attributes:
+        _registry (Dict[str, RawStatisticFunction]): A dictionary mapping function
+            names (str) to their corresponding statistic functions.
+
+    Methods:
+        content (property): Returns a list of all registered function names.
+        add(name: str): Registers a statistic function under a specified name.
+        get(name: str): Retrieves a registered statistic function by its name.
+
+    Example:
+        >>> registry = Registry()
+        >>> @registry.add('mean')
+        >>> def mean_fn(data):
+        >>>     return np.mean(data)
+        >>> mean_fn = registry.get('mean')
+        >>> print(mean_fn)
+        <function mean_fn at 0x...>
+
+    Raises:
+        ValueError: If a function name already exists when trying to add a new
+            one or if a name is not found when trying to retrieve a function.
+    """
+
     def __init__(self):
+        """Initializes a new empty registry."""
         self._registry: Dict[str, RawStatisticFunction] = {}
 
     @property
     def content(self) -> List[str]:
+        """Returns a list of all the names of the registered statistic functions."""
         return list(self._registry.keys())
 
     def add(self, name: str):
+        """
+        Registers a new statistic function under a given name.
+
+        This method registers a new statistic function to the registry. If the name
+        is already taken, a `ValueError` is raised. The function must be decorated
+        with this method.
+
+        Args:
+            name (str): The name under which the statistic function will be registered.
+
+        Returns:
+            Callable: A decorator function that registers a statistic function.
+
+        Raises:
+            ValueError: If the name is already taken in the registry.
+        """
         if name in self._registry:
             raise ValueError(f"Invalid parameter {name=:}: exists already.")
 
@@ -59,12 +107,26 @@ class Registry:
         return decorator
 
     def get(self, name: str) -> RawStatisticFunction:
+        """
+        Retrieves a statistic function by its name from the registry.
+
+        This method returns the statistic function associated with the given name.
+        If the name is not found in the registry, a `ValueError` is raised.
+
+        Args:
+            name (str): The name of the statistic function to retrieve.
+
+        Returns:
+            RawStatisticFunction: The statistic function registered under the given name.
+
+        Raises:
+            ValueError: If the name is not found in the registry.
+        """
         try:
             return self._registry[name]
         except KeyError:
             raise ValueError(
-                f"Invalid parameter {name=:}: not found, "
-                f"choose from {self.content}."
+                f"Invalid parameter {name=:}: not found, choose from {self.content}."
             )
 
 
