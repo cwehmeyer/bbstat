@@ -5,6 +5,7 @@ import pytest
 from numpy.typing import NDArray
 
 from bbstat.statistics import (
+    Registry,
     compute_weighted_aggregate,
     compute_weighted_mean,
     compute_weighted_median,
@@ -44,6 +45,33 @@ def weights_constant(data_random: NDArray[np.floating]) -> NDArray[np.floating]:
 @pytest.fixture(scope="module")
 def weights_random(data_constant: NDArray[np.floating]) -> NDArray[np.floating]:
     return np.random.default_rng().dirichlet(alpha=np.ones_like(data_constant))
+
+
+def test_statistic_registry(
+    data_random: NDArray[np.floating],
+    weights_random: NDArray[np.floating],
+) -> None:
+    local_registry = Registry()
+    assert local_registry.content == []
+
+    @local_registry.add("test_func")
+    def test_func(data: NDArray[np.floating], weights: NDArray[np.floating]) -> float:
+        return compute_weighted_aggregate(data=data, weights=weights)
+
+    assert local_registry.content == ["test_func"]
+    statistic_fn = local_registry.get("test_func")
+    actual = statistic_fn(data=data_random, weights=weights_random)
+    expected = compute_weighted_aggregate(data=data_random, weights=weights_random)
+    np.testing.assert_allclose(actual, expected)
+
+    with pytest.raises(ValueError):
+
+        @local_registry.add("test_func")
+        def test_func2(
+            data: NDArray[np.floating],
+            weights: NDArray[np.floating],
+        ) -> float:
+            return compute_weighted_aggregate(data=data, weights=weights)
 
 
 @pytest.mark.parametrize(

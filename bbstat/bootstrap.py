@@ -9,10 +9,7 @@ from .resample import resample
 
 def bootstrap(
     data: statistics.StatisticFunctionDataInput,
-    statistic_fn: Union[
-        str,
-        statistics.StatisticFunction,
-    ],
+    statistic_fn: Union[str, statistics.StatisticFunction],
     n_boot: int = 1000,
     coverage: float = 0.87,
     seed: Optional[int] = None,
@@ -32,13 +29,9 @@ def bootstrap(
                 raise ValueError(
                     f"Invalid parameter {data[i].shape[0]=:}: must be {n_data=:}."
                 )
+
     if isinstance(statistic_fn, str):
-        if statistic_fn not in statistics._REGISTRY.keys():
-            raise ValueError(
-                f"Unknown {statistic_fn=:}: "
-                f"choose from {list(statistics._REGISTRY.keys())}."
-            )
-        statistic_fn = statistics._REGISTRY[statistic_fn]
+        statistic_fn = statistics.registry.get(statistic_fn)
     estimates = np.array(
         [
             statistic_fn(data=data, weights=weights, **(fn_kwargs or {}))
