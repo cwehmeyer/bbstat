@@ -10,24 +10,41 @@ def resample(
     seed: Optional[int] = None,
     blocksize: Optional[int] = None,
 ) -> Generator[NDArray[np.floating], None, None]:
-    """Generate Dirichlet-distributed weights.
+    """
+    Generates bootstrap resamples with Dirichlet-distributed weights.
 
-    Parameters
-    ----------
-    n_boot: int
-        Number of resampling steps for the bootstrap.
-    n_data: int
-        Number of data points to resample.
-    seed: Optional[int], default is None
-        Optional seed for the random number generator.
-    blocksize: Optional[int], default is None
-        Optional size for the `numpy.random.Generator.dirichlet()` call
-        (how many resampling steps are generated in one call).
+    This function performs resampling by generating weights from a Dirichlet distribution.
+    The number of resamples is controlled by the `n_boot` argument, while the size of
+    each block of resamples can be adjusted using the `blocksize` argument. The `seed`
+    argument allows for reproducible results.
 
-    Returns
-    -------
-    Generator[numpy.array(shape=n_data), None, None]
-        Dirichlet-distributed weights with `alpha=numpy.ones(n_data)`.
+    Args:
+        n_boot (int): The total number of bootstrap resamples to generate.
+        n_data (int): The number of data points to resample (used for the dimension of the
+            Dirichlet distribution).
+        seed (Optional[int]): A random seed for reproducibility (default is `None` for
+            random seeding).
+        blocksize (Optional[int]): The number of resamples to generate in each block.
+            If `None`, the entire number of resamples is generated in one block.
+            Defaults to `None`.
+
+    Yields:
+        Generator[NDArray[np.floating], None, None]: A generator that yields each resample
+            (a 1D array of floats) as it is generated. Each resample contains Dirichlet-
+            distributed weights for the given `n_data`.
+
+    Example:
+        >>> for r in resample(n_boot=10, n_data=5):
+        >>>     print(r)
+
+    Notes:
+        - If `blocksize` is specified, the resampling will be performed in smaller blocks,
+          which can be useful for parallelizing or limiting memory usage.
+        - The function uses NumPy's `default_rng` to generate random numbers, which provides
+          a more flexible and efficient interface compared to `np.random.seed`.
+
+    Raises:
+        ValueError: If `n_boot` is less than or equal to 0, or `n_data` is less than 1.
     """
     rng = np.random.default_rng(seed)
     alpha = np.ones(n_data)
