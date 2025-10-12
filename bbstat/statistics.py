@@ -139,23 +139,43 @@ def compute_weighted_aggregate(
     weights: FArray,
     factor: Optional[float] = None,
 ) -> float:
-    """Compute a weighted aggregate of data.
+    """
+    Computes a weighted aggregate of the input data.
 
-    This is dot-product betweeen weights and data.
+    This function calculates the dot product of the input `data` and `weights`.
+    The function assumes that both `data` and `weights` are 1D arrays of the same
+    length and that the weights sum to 1. If a `factor` is provided, the dot product
+    is multiplied with it.
 
-    Parameters
-    ----------
-    data: numpy.array(shape=(n,))
-        Data points to resample and aggregate.
-    weights: numpy.array(shape=(n_data,))
-        Weights for resampling, either via block or loop.
-    factor: Optional[int], default is None
-        Rescaling for the aggregation, used to compute means or sums.
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing the
+            data to be aggregated.
+        weights (NDArray[np.floating]): A 1D array of numeric values representing
+            the weights for the data.
+        factor (float, optional): A scalar factor to multiply with the computed
+            aggregate (default is None).
 
-    Returns
-    -------
-    float
-        Reweighted and aggregated (and optionally rescaled) data.
+    Returns:
+        float: The computed weighted aggregate, potentially scaled by the `factor`.
+
+    Raises:
+        ValueError: If `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_aggregate(data, weights)
+        2.1
+        >>> compute_weighted_aggregate(data, weights, factor=1.5)
+        3.15
+
+    Notes:
+        The weighted aggregate is computed using the dot product between `data` and `weights`.
+        The optional `factor` scales the result of this dot product. If no factor is given,
+        the aggregation computes the weighted arithmetic mean of the data; if instead the factor
+        equals the length of the data array, the aggregation computes the weighted sum.
+        This function is registered under the name "aggregate".
     """
     if data.ndim != 1:
         raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
@@ -177,6 +197,34 @@ def compute_weighted_mean(
     data: FArray,
     weights: FArray,
 ) -> float:
+    """
+    Computes a weighted mean of the input data.
+
+    This function calculates the weighted arithmetic mean of the input `data`
+    and `weights` via the `compute_weighted_aggregate` function.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the data to be averaged.
+        weights (NDArray[np.floating]): A 1D array of numeric values representing
+            the weights for the data.
+
+    Returns:
+        float: The computed weighted mean.
+
+    Raises:
+        ValueError: If `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_mean(data, weights)
+        2.1
+
+    Notes:
+        This function is registered under the name "mean".
+    """
     return compute_weighted_aggregate(data=data, weights=weights, factor=None)
 
 
@@ -185,6 +233,35 @@ def compute_weighted_sum(
     data: FArray,
     weights: FArray,
 ) -> float:
+    """
+    Computes a weighted sum of the input data.
+
+    This function calculates the weighted sum of the input `data`
+    and `weights` via the `compute_weighted_aggregate` function with
+    `factor=len(data)`.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the data to be summed.
+        weights (NDArray[np.floating]): A 1D array of numeric values representing
+            the weights for the data.
+
+    Returns:
+        float: The computed weighted sum.
+
+    Raises:
+        ValueError: If `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_sum(data, weights)
+        6.3
+
+    Notes:
+        This function is registered under the name "sum".
+    """
     return compute_weighted_aggregate(data=data, weights=weights, factor=len(data))
 
 
@@ -195,6 +272,42 @@ def compute_weighted_variance(
     weighted_mean: Optional[float] = None,
     ddof: int = 0,
 ) -> float:
+    """
+    Computes a weighted variance of the input data.
+
+    This function calculates the weighted variance of the input `data`
+    and `weights` via the `compute_weighted_aggregate` function with
+    `factor=len(data) / (len(data) - ddof)`, where `ddof` specifies the
+    delta degrees of freedom.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the data for which we want the variance.
+        weights (NDArray[np.floating]): A 1D array of numeric values representing
+            the weights for the data.
+        weighted_mean (float, optional): The weighted mean of the data (default is
+            None). If missing, this value is computed via `compute_weighted_mean`.
+        ddof (int, optional): Delta degrees of freedom.
+            Defaults to 0 (population formula). Use 1 for sample-based correction.
+
+    Returns:
+        float: The computed weighted variance.
+
+    Raises:
+        ValueError: If `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_variance(data, weights)
+        0.49
+        >>> compute_weighted_variance(data, weights, ddof=1)
+        0.735
+
+    Notes:
+        This function is registered under the name "variance".
+    """
     if weighted_mean is None:
         weighted_mean = compute_weighted_mean(data=data, weights=weights)
     return compute_weighted_aggregate(
@@ -211,6 +324,40 @@ def compute_weighted_std(
     weighted_mean: Optional[float] = None,
     ddof: int = 0,
 ) -> float:
+    """
+    Computes a weighted standard deviation of the input data.
+
+    This function calculates the weighted standard deviation of the
+    input `data` and `weights` via the square root of the
+    `compute_weighted_variance` function.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the data for which we want the standard deviation.
+        weights (NDArray[np.floating]): A 1D array of numeric values representing
+            the weights for the data.
+        weighted_mean (float, optional): The weighted mean of the data (default is
+            None). If missing, this value is computed via `compute_weighted_mean`
+            via `compute_weighted_variance`.
+        ddof (int, optional): Delta degrees of freedom.
+            Defaults to 0 (population formula). Use 1 for sample-based correction.
+
+    Returns:
+        float: The computed weighted standard deviation.
+
+    Raises:
+        ValueError: If `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_std(data, weights)
+        0.7
+
+    Notes:
+        This function is registered under the name "std".
+    """
     weighted_variance = compute_weighted_variance(
         data=data,
         weights=weights,
@@ -227,6 +374,56 @@ def compute_weighted_quantile(
     quantile: float,
     sorter: Optional[IArray] = None,
 ) -> float:
+    """
+    Computes a weighted quantile of 1D data using linear interpolation.
+
+    This function calculates the weighted quantile of the given `data` array
+    based on the provided `weights`. It uses a normalized cumulative weight
+    distribution to determine the interpolated quantile value. The computation
+    assumes both `data` and `weights` are 1D arrays of equal length.
+
+    A precomputed `sorter` (array of indices that would sort `data`) can be
+    optionally provided to avoid recomputing it internally.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the sample data.
+        weights (NDArray[np.floating]): A 1D array of numeric weights corresponding
+            to the data.
+        quantile (float): The desired quantile in the interval [0, 1].
+        sorter (Optional[NDArray[np.integer]]): Optional array of indices that
+            sorts `data`.
+
+    Returns:
+        float: The interpolated weighted quantile value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_quantile(data, weights, quantile=0.7)
+        2.2
+
+    Notes:
+        - If `quantile` is less than or equal to the minimum cumulative weight,
+          the smallest data point is returned.
+        - If `quantile` is greater than or equal to the maximum cumulative weight,
+          the largest data point is returned.
+        - Linear interpolation is used between the two closest surrounding data points.
+        - Providing a precomputed `sorter` can optimize performance in repeated calls.
+        - This function is registered under the name "quantile".
+    """
+    if data.ndim != 1:
+        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
+    if weights.ndim != 1:
+        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
+    if weights.shape != data.shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
+            "must be equal."
+        )
     if sorter is None:
         sorter = np.argsort(data)
     cumulative_weights = np.cumsum(weights[sorter])
@@ -252,6 +449,37 @@ def compute_weighted_percentile(
     percentile: float,
     sorter: Optional[NDArray[np.integer]] = None,
 ) -> float:
+    """
+    Computes a weighted percentile of 1D data using linear interpolation.
+
+    This function calculates the weighted percentile of the given `data` array
+    based on the provided `weights` via `compute_weighted_quantile` with parameter
+    `quantile=0.01 * percentile`.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the sample data.
+        weights (NDArray[np.floating]): A 1D array of numeric weights corresponding
+            to the data.
+        percentile (float): The desired percentile in the interval [0, 100].
+        sorter (Optional[NDArray[np.integer]]): Optional array of indices that
+            sorts `data`.
+
+    Returns:
+        float: The interpolated weighted percentile value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_percentile(data, weights, percentile=70)
+        2.2
+
+    Notes:
+        This function is registered under the name "percentile".
+    """
     return compute_weighted_quantile(
         data=data,
         weights=weights,
@@ -266,6 +494,36 @@ def compute_weighted_median(
     weights: FArray,
     sorter: Optional[NDArray[np.integer]] = None,
 ) -> float:
+    """
+    Computes a weighted median of 1D data using linear interpolation.
+
+    This function calculates the weighted meadian of the given `data` array
+    based on the provided `weights` via `compute_weighted_quantile` with parameter
+    `quantile=0.5`.
+
+    Args:
+        data (NDArray[np.floating]): A 1D array of numeric values representing
+            the sample data.
+        weights (NDArray[np.floating]): A 1D array of numeric weights corresponding
+            to the data.
+        sorter (Optional[NDArray[np.integer]]): Optional array of indices that
+            sorts `data`.
+
+    Returns:
+        float: The interpolated weighted median value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D.
+
+    Example:
+        >>> data = np.array([1.0, 2.0, 3.0])
+        >>> weights = np.array([0.4, 0.2, 0.4])
+        >>> compute_weighted_median(data, weights)
+        2.25
+
+    Notes:
+        This function is registered under the name "median".
+    """
     return compute_weighted_quantile(
         data=data,
         weights=weights,
@@ -280,6 +538,48 @@ def compute_weighted_pearson_dependency(
     weights: FArray,
     ddof: int = 0,
 ) -> float:
+    """
+    Computes the weighted Pearson correlation coefficient (dependency) between two 1D arrays.
+
+    This function calculates the linear dependency between two variables using a weighted
+    version of Pearson's correlation coefficient. The inputs `data_1` and `data_2` are
+    expected to be 1D arrays of the same length, provided as a tuple `data`. Each data point
+    is assigned a weight from the `weights` array.
+
+    The function normalizes both variables by subtracting their weighted means and dividing
+    by their weighted standard deviations, then computes the weighted mean of the element-wise
+    product of these normalized arrays.
+
+    Args:
+        data (NDArray[np.floating]): A tuple of two 1D float arrays `(data_1, data_2)`
+            of equal length.
+        weights (NDArray[np.floating]): A 1D float array of weights, same length as
+            each array in `data`.
+        ddof (int, optional): Delta degrees of freedom for standard deviation.
+            Defaults to 0 (population formula). Use 1 for sample-based correction.
+
+    Returns:
+        float: The weighted Pearson correlation coefficient in the range [-1, 1].
+
+    Raises:
+        ValueError: If the input arrays are not 1D or have mismatched lengths.
+
+    Example:
+        >>> data_1 = np.array([1.0, 2.0, 3.0])
+        >>> data_2 = np.array([1.0, 2.0, 2.9])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_pearson_dependency((data_1, data_2), weights)
+        0.998...
+
+    Notes:
+        - The function relies on `compute_weighted_mean` and `compute_weighted_std`.
+        - The correlation is computed using the formula:
+            corr = weighted_mean(z1 * z2)
+          where z1 and z2 are the standardized variables.
+        - The result is bounded between -1 (perfect negative linear relationship)
+          and 1 (perfect positive linear relationship), with 0 indicating no linear dependency.
+        - This function is registered under the name "pearson_dependency".
+    """
     data_1, data_2 = data
     weighted_mean_1 = compute_weighted_mean(data=data_1, weights=weights)
     weighted_mean_2 = compute_weighted_mean(data=data_2, weights=weights)
@@ -306,6 +606,45 @@ def compute_weighted_spearman_dependency(
     weights: FArray,
     ddof: int = 0,
 ) -> float:
+    """
+    Computes the weighted Spearman rank correlation coefficient between two 1D arrays.
+
+    This function measures the monotonic relationship between two variables by computing
+    the weighted Pearson correlation between their ranked values (i.e., their order statistics).
+    It is particularly useful for assessing non-linear relationships.
+
+    Args:
+        data (NDArray[np.floating]): A tuple of two 1D float arrays `(data_1, data_2)`
+            of equal length.
+        weights (NDArray[np.floating]): A 1D float array of weights, same length as
+            each array in `data`.
+        ddof (int, optional): Delta degrees of freedom for standard deviation.
+            Defaults to 0 (population formula). Use 1 for sample-based correction.
+
+    Returns:
+        float: The weighted Spearman rank correlation coefficient in the range [-1, 1].
+
+    Raises:
+        ValueError: If the input arrays are not 1D or have mismatched lengths.
+
+    Example:
+        >>> data_1 = np.array([1.0, 2.0, 3.0])
+        >>> data_2 = np.array([0.3, 0.2, 0.1])
+        >>> weights = np.array([0.2, 0.5, 0.3])
+        >>> compute_weighted_spearman_dependency((data_1, data_2), weights)
+        -0.9999...
+
+    Notes:
+        - Internally, ranks are computed using `scipy.stats.rankdata`, which handles ties
+          by assigning average ranks.
+        - The Spearman coefficient is equivalent to the Pearson correlation between
+          rank-transformed data.
+        - Output is bounded between -1 (perfect inverse monotonic relationship)
+          and 1 (perfect direct monotonic relationship), with 0 indicating no
+          monotonic correlation.
+        - Weights are applied after ranking.
+        - This function is registered under the name "spearman_dependency".
+    """
     data_1, data_2 = data
     ranks_1 = rankdata(data_1)
     ranks_2 = rankdata(data_2)
@@ -320,14 +659,51 @@ def compute_weighted_spearman_dependency(
 def compute_weighted_eta_square_dependency(
     data: IFArray,
     weights: FArray,
-    ddof: int = 0,
 ) -> float:
+    """
+    Computes the weighted eta-squared (η²) statistic to assess dependency between
+    a categorical and a numerical variable.
+
+    Eta-squared measures the proportion of total variance in the numerical variable
+    that is explained by the categorical grouping. It is commonly used in ANOVA-like
+    analyses and effect size estimation. The value is bounded between 0 and 1.
+
+    Args:
+        data (Tuple[NDArray[np.integer], NDArray[np.floating]]): A tuple
+            `(data_cat, data_num)` where:
+                - `data_cat` is a 1D array of integer-encoded categorical values.
+                - `data_num` is a 1D array of corresponding numeric values.
+        weights (NDArray[np.floating]): A 1D array of non-negative weights,
+            same length as `data_cat`.
+
+    Returns:
+        float: Weighted eta-squared value in the range [0, 1], where higher values
+        indicate stronger association between the categorical and numeric variable.
+
+    Raises:
+        ValueError: If input arrays are not 1D or do not have matching shapes.
+
+    Example:
+        >>> data_cat = np.array([0, 0, 1, 1])
+        >>> data_num = np.array([1.0, 2.0, 3.0, 4.0])
+        >>> weights = np.array([0.25, 0.25, 0.25, 0.25)
+        >>> compute_weighted_eta_square_dependency((data_cat, data_num), weights)
+        0.8
+
+    Notes:
+        - Internally, η² is computed as the ratio of weighted between-group variance
+          to the total weighted variance.
+        - The statistic is sensitive to group sizes and imbalance in weights.
+        - When all group means equal the global mean, η² is 0.
+        - When groups are perfectly separated by the numeric variable, η² is 1.
+        - This function is registered under the name "eta_square_dependency".
+    """
     data_cat, data_num = data
     mean_sample = compute_weighted_mean(data=data_num, weights=weights)
     group_variance_sum = 0.0
     for value in np.unique(data_cat):
         subset = data_cat == value
-        group_weight = weights[subset].sum()
+        group_weight = weights[subset].sum().item()
         mean_group = compute_weighted_aggregate(
             data=data_num[subset],
             weights=weights[subset],
