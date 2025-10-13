@@ -1,3 +1,35 @@
+"""
+evaluate.py
+===========
+
+Evaluation utilities for summarizing bootstrap resampling results.
+
+This module provides functions and data structures for interpreting and summarizing
+the output of Bayesian bootstrap resampling procedures. It includes tools to compute
+credibility intervals for statistical estimates and to encapsulate the results of a
+bootstrap analysis in a convenient data class.
+
+Contents:
+---------
+- `credibility_interval`: Computes a credibility interval from a set of estimates.
+- `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
+  and automatically evaluates the credibility interval.
+
+Typical usage:
+--------------
+>>> from bbstat.evaluate import credibility_interval, BootstrapResult
+>>> result = BootstrapResult(estimates=np.array([1.2, 2.3, 2.9]), coverage=0.87)
+>>> print(result)
+>>> lower, upper = result.credibility_interval(0.9)  # recompute ci for different coverage
+
+Notes:
+------
+- The credibility interval is calculated using quantiles of the empirical distribution
+  of bootstrap estimates.
+- This module is designed to be used alongside the `bootstrap` and `resample` modules
+  to provide complete statistical summaries of resampled data.
+"""
+
 import math
 from dataclasses import dataclass, field
 from typing import Tuple

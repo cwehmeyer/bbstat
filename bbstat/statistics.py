@@ -1,3 +1,74 @@
+"""
+statistics.py
+=============
+
+Type definitions, function protocols, and a registry of weighted statistical functions
+for use in bootstrap resampling and analysis.
+
+This module defines flexible types and interfaces for statistical functions that operate
+on weighted data, particularly in the context of Bayesian bootstrap procedures. It includes
+a function registry (`Registry`) for registering and retrieving statistic functions by name,
+and provides a collection of pre-defined weighted statistics (e.g., mean, variance, quantile).
+
+Key Features
+------------
+- Type aliases for weighted data and function signatures.
+- Protocols for defining callables that conform to the statistical function interface.
+- A `Registry` class for dynamically registering and retrieving statistic functions.
+- A library of built-in weighted statistical functions (e.g., mean, std, quantile, etc.)
+
+Type Aliases
+------------
+- `FArray`: Alias for `NDArray[np.floating]`, used for floating-point data and weights.
+- `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
+- `FFArray`, `IFArray`: Tuples of data arrays used in bivariate computations.
+- `StatisticFunctionDataInput`: Union type for valid input formats accepted by statistic functions.
+
+Protocols
+---------
+- `StatisticFunction`: Interface for a statistic function that accepts typed data and weights.
+- `RawStatisticFunction`: A more permissive protocol used internally by the registry.
+
+Statistic Function Registry
+---------------------------
+The `Registry` class allows users to register new statistic functions using a decorator syntax.
+All registered functions must follow the `RawStatisticFunction` protocol.
+
+Example:
+    >>> registry = Registry()
+    >>> @registry.add("mean")
+    >>> def my_weighted_mean(data, weights):
+    >>>     return np.sum(data * weights)
+    >>> registry.get("mean")
+    <function my_weighted_mean at 0x...>
+
+Built-in Registered Functions
+-----------------------------
+- `"aggregate"`: Weighted dot product, optionally scaled by a factor (internal use only).
+- `"mean"`: Weighted arithmetic mean.
+- `"sum"`: Weighted sum.
+- `"variance"`: Weighted variance with optional degrees of freedom correction.
+- `"std"`: Weighted standard deviation.
+- `"quantile"` / `"percentile"`: Weighted quantile estimation.
+- `"median"`: Weighted median.
+- `"pearson_dependency"`: Weighted Pearson correlation for two variables.
+- `"spearman_dependency"`: Weighted Spearman correlation.
+- `"eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
+
+Usage Example
+-------------
+>>> from bbstat.statistics import registry
+>>> stat_fn = registry.get("mean")
+>>> result = stat_fn(data, weights)
+
+Notes
+-----
+- All registered functions assume normalized weights (i.e., sum to 1).
+- Functions raise `ValueError` for invalid shapes, mismatched dimensions, or inappropriate input types.
+- This module is intended for use with `bootstrap`, which applies these functions across bootstrap resamples.
+
+"""
+
 import math
 from typing import (
     Any,

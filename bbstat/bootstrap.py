@@ -1,3 +1,38 @@
+"""
+bootstrap.py
+============
+
+Bayesian bootstrap resampling for statistical estimation and uncertainty quantification.
+
+This module provides the `bootstrap` function, which applies the Bayesian bootstrap
+resampling method to estimate a statistic (such as the mean or median) along with its
+credibility interval. It supports flexible input data formats, user-defined or
+registered statistic functions, and additional customization via keyword arguments.
+
+The function is designed for use in probabilistic data analysis workflows, where
+quantifying uncertainty through resampling is critical. It is particularly well-suited
+for small to moderate datasets and non-parametric inference.
+
+Main Features:
+--------------
+- Resampling via the Bayesian bootstrap method.
+- Support for scalar or multivariate data inputs.
+- Use of string-based or function-based statistic definitions.
+- Configurable number of resamples and credibility interval coverage.
+- Optional blockwise resampling for structured data.
+- Random seed control for reproducibility.
+
+Example:
+--------
+>>> import numpy as np
+>>> from bbstat.bootstrap import bootstrap
+>>> data = np.random.randn(100)
+>>> result = bootstrap(data, statistic_fn="mean")
+>>> print(result.mean, result.ci)
+
+See the function-level docstring of `bootstrap` for full details.
+"""
+
 from typing import Any, Dict, Optional, Union
 
 import numpy as np
@@ -5,6 +40,8 @@ import numpy as np
 from . import statistics
 from .evaluate import BootstrapResult
 from .resample import resample
+
+__all__ = ["bootstrap"]
 
 
 def bootstrap(

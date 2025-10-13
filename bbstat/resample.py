@@ -1,3 +1,38 @@
+"""
+resample.py
+===========
+
+Bootstrap resampling utilities using Dirichlet-distributed weights.
+
+This module provides functionality for generating bootstrap resamples via the Bayesian
+bootstrap method, where resamples are weighted using samples from a Dirichlet distribution.
+It is intended for internal use within higher-level resampling and estimation workflows.
+
+The primary function, `resample`, yields weighted resamples suitable for estimating
+statistics under uncertainty without making parametric assumptions.
+
+Features:
+---------
+- Dirichlet-based resampling for Bayesian bootstrap.
+- Support for blockwise resample generation to control memory usage.
+- Optional random seed for reproducibility.
+- Generator interface for efficient streaming of resample weights.
+
+Typical usage:
+--------------
+>>> from bbstat.resample import resample
+>>> for weights in resample(n_boot=1000, n_data=50):
+>>>     # Apply weights to compute statistic
+>>>     ...
+
+Notes:
+------
+- The function is designed to scale to large numbers of resamples.
+- It is most useful as a low-level utility within a bootstrap framework.
+
+See the `resample` function docstring for complete usage details.
+"""
+
 from typing import Generator, Optional
 
 import numpy as np
@@ -44,8 +79,12 @@ def resample(
           a more flexible and efficient interface compared to `np.random.seed`.
 
     Raises:
-        ValueError: If `n_boot` is less than or equal to 0, or `n_data` is less than 1.
+        ValueError: If `n_boot` is less than 1 or `n_data` is less than 1.
     """
+    if n_boot < 1:
+        raise ValueError(f"Invalid parameter {n_boot=:}: must be positive.")
+    if n_data < 1:
+        raise ValueError(f"Invalid parameter {n_data=:}: must be positive.")
     rng = np.random.default_rng(seed)
     alpha = np.ones(n_data)
     if blocksize is None:
