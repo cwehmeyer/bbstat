@@ -1,0 +1,24 @@
+site_name: bbstat
+# site_url: https://yourproject.org
+repo_url: https://github.com/cwehmeyer/bbstat
+repo_name: cwehmeyer/bbstat
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Usage: usage.md
+  - API Reference: reference.md
