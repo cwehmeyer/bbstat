@@ -2,20 +2,19 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import pytest
-from numpy.typing import NDArray
 
 from bbstat.bootstrap import bootstrap
 from bbstat.evaluate import BootstrapResult
-from bbstat.statistics import StatisticFunctionDataInput, compute_weighted_aggregate
+from bbstat.statistics import compute_weighted_aggregate, FArray
 
 
 @pytest.fixture(scope="module")
-def data_constant() -> NDArray[np.floating]:
+def data_constant() -> FArray:
     return np.ones(shape=(101,))
 
 
 @pytest.fixture(scope="module")
-def data_random() -> NDArray[np.floating]:
+def data_random() -> FArray:
     return np.random.default_rng(1).normal(size=1000)
 
 
@@ -49,7 +48,7 @@ def data_random() -> NDArray[np.floating]:
     ],
 )
 def test_bootstrap_constant(
-    data_constant: NDArray[np.floating],
+    data_constant: FArray,
     n_boot: int,
     coverage: float,
     seed: Optional[int],
@@ -72,7 +71,7 @@ def test_bootstrap_constant(
     np.testing.assert_allclose(bootstrap_result.estimates, 1.0)
 
 
-def test_bootstrap_random(data_random: NDArray[np.floating]) -> None:
+def test_bootstrap_random(data_random: FArray) -> None:
     bootstrap_result = bootstrap(
         data=data_random,
         statistic_fn=compute_weighted_aggregate,
@@ -96,7 +95,7 @@ def test_bootstrap_random(data_random: NDArray[np.floating]) -> None:
     ],
 )
 def test_bootstrap_random_single_array(
-    data_random: NDArray[np.floating],
+    data_random: FArray,
     name: str,
     fn_kwargs: Dict[str, Any],
 ) -> None:
@@ -118,7 +117,7 @@ def test_bootstrap_random_single_array(
     ],
 )
 def test_bootstrap_random_two_arrays(
-    data_random: NDArray[np.floating],
+    data_random: FArray,
     name: str,
     fn_kwargs: Dict[str, Any],
 ) -> None:
@@ -131,7 +130,7 @@ def test_bootstrap_random_two_arrays(
     assert isinstance(bootstrap_result, BootstrapResult)
 
 
-def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None:
+def test_bootstrap_random_with_factor(data_random: FArray) -> None:
     bootstrap_result = bootstrap(
         data=data_random,
         statistic_fn=compute_weighted_aggregate,
@@ -152,7 +151,7 @@ def test_bootstrap_random_with_factor(data_random: NDArray[np.floating]) -> None
         pytest.param([np.array([1]), np.array([1, 1])]),
     ],
 )
-def test_bootstrap_fail_on_data(data: StatisticFunctionDataInput) -> None:
+def test_bootstrap_fail_on_data(data: Any) -> None:
     with pytest.raises(ValueError):
         _ = bootstrap(
             data=data,
@@ -160,7 +159,7 @@ def test_bootstrap_fail_on_data(data: StatisticFunctionDataInput) -> None:
         )
 
 
-def test_bootstrap_fail_on_statistic_name(data_random: NDArray[np.floating]) -> None:
+def test_bootstrap_fail_on_statistic_name(data_random: FArray) -> None:
     with pytest.raises(ValueError):
         _ = bootstrap(
             data=data_random,

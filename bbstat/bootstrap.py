@@ -28,16 +28,16 @@ Example:
 >>> from bbstat.bootstrap import bootstrap
 >>> data = np.random.randn(100)
 >>> result = bootstrap(data, statistic_fn="mean")
->>> print(result.mean, result.ci)
+>>> print(result)
 
 See the function-level docstring of `bootstrap` for full details.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, Callable
 
 import numpy as np
 
-from . import statistics
+from .registry import get_statistic_fn
 from .evaluate import BootstrapResult
 from .resample import resample
 
@@ -45,8 +45,8 @@ __all__ = ["bootstrap"]
 
 
 def bootstrap(
-    data: statistics.StatisticFunctionDataInput,
-    statistic_fn: Union[str, statistics.StatisticFunction],
+    data: Any,
+    statistic_fn: Union[str, Callable],
     n_boot: int = 1000,
     coverage: float = 0.87,
     seed: Optional[int] = None,
@@ -61,7 +61,7 @@ def bootstrap(
     computes the mean and credibility interval for the estimated statistic across all resamples.
 
     Args:
-        data (StatisticFunctionDataInput): The data to be resampled. It can be a 1D array, a tuple,
+        data (Any): The data to be resampled. It can be a 1D array, a tuple,
             or a list of arrays where each element represents a different group of data to resample.
         statistic_fn (Union[str, StatisticFunction]): The statistic function to be applied on each
             bootstrap resample. It can either be the name of a registered statistic function or the
@@ -116,7 +116,7 @@ def bootstrap(
                 )
 
     if isinstance(statistic_fn, str):
-        statistic_fn = statistics.registry.get(statistic_fn)
+        statistic_fn = get_statistic_fn(statistic_fn)
     estimates = np.array(
         [
             statistic_fn(data=data, weights=weights, **(fn_kwargs or {}))
