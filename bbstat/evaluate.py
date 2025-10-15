@@ -17,10 +17,9 @@ Contents:
 
 Typical usage:
 --------------
->>> from bbstat.evaluate import credibility_interval, BootstrapResult
+>>> from bbstat.evaluate import BootstrapResult
 >>> result = BootstrapResult(estimates=np.array([1.2, 2.3, 2.9]), coverage=0.87)
 >>> print(result)
->>> lower, upper = result.credibility_interval(0.9)  # recompute ci for different coverage
 
 Notes:
 ------
@@ -35,11 +34,12 @@ from dataclasses import dataclass, field
 from typing import Tuple
 
 import numpy as np
-from numpy.typing import NDArray
+
+from .statistics import FArray
 
 
 def credibility_interval(
-    estimates: NDArray[np.floating],
+    estimates: FArray,
     coverage: float = 0.87,
 ) -> Tuple[float, float]:
     """
@@ -53,7 +53,7 @@ def credibility_interval(
     `(1 - coverage) / 2` and `1 - (1 - coverage) / 2` of the sorted `estimates` data.
 
     Args:
-        estimates (NDArray[np.floating]): A 1D array of floating-point numbers representing
+        estimates (FArray): A 1D array of floating-point numbers representing
             the estimates from which the credibility interval will be calculated.
         coverage (float, optional): The proportion of data to be included in the credibility
             interval. Must be between 0 and 1 (exclusive). Default is 0.87.
@@ -95,7 +95,7 @@ class BootstrapResult:
         ci (Tuple[float, float]): The lower and upper bounds of the credibility interval.
         coverage (float): The desired coverage for the credibility interval (between 0 and 1).
         n_boot (int): The number of bootstrap resamples (i.e., the number of estimates).
-        estimates (NDArray[np.floating]): The array of bootstrap resample estimates.
+        estimates (FArray): The array of bootstrap resample estimates.
 
     Methods:
         __post_init__: Initializes the `mean`, `ci`, and `n_boot` attributes.
@@ -111,7 +111,7 @@ class BootstrapResult:
     ci: Tuple[float, float] = field(init=False)
     coverage: float
     n_boot: int = field(init=False)
-    estimates: NDArray[np.floating]
+    estimates: FArray
 
     def __post_init__(self):
         """

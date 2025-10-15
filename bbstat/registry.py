@@ -2,7 +2,6 @@
 registry.py
 ===========
 
-
 Statistic function registry and protocol definition.
 
 This module defines a strict `Protocol` (`StatisticFunction`) for all supported
