@@ -2,10 +2,9 @@ from typing import Optional
 
 import numpy as np
 import pytest
-from numpy.typing import NDArray
 
 from bbstat.statistics import (
-    Registry,
+    FArray,
     compute_weighted_aggregate,
     compute_weighted_mean,
     compute_weighted_median,
@@ -19,17 +18,17 @@ from bbstat.statistics import (
 
 
 @pytest.fixture(scope="module")
-def data_random() -> NDArray[np.floating]:
+def data_random() -> FArray:
     return np.random.normal(loc=0.0, scale=1.0, size=101)
 
 
 @pytest.fixture(scope="module")
-def data_constant() -> NDArray[np.floating]:
+def data_constant() -> FArray:
     return np.ones(shape=(101,))
 
 
 @pytest.fixture(scope="module")
-def data_dependent(data_random: NDArray[np.floating]) -> NDArray[np.floating]:
+def data_dependent(data_random: FArray) -> FArray:
     return data_random + np.random.uniform(
         -1e-2,
         1e-2,
@@ -38,40 +37,13 @@ def data_dependent(data_random: NDArray[np.floating]) -> NDArray[np.floating]:
 
 
 @pytest.fixture(scope="module")
-def weights_constant(data_random: NDArray[np.floating]) -> NDArray[np.floating]:
+def weights_constant(data_random: FArray) -> FArray:
     return np.ones_like(data_random) / len(data_random)
 
 
 @pytest.fixture(scope="module")
-def weights_random(data_constant: NDArray[np.floating]) -> NDArray[np.floating]:
+def weights_random(data_constant: FArray) -> FArray:
     return np.random.default_rng().dirichlet(alpha=np.ones_like(data_constant))
-
-
-def test_statistic_registry(
-    data_random: NDArray[np.floating],
-    weights_random: NDArray[np.floating],
-) -> None:
-    local_registry = Registry()
-    assert local_registry.content == []
-
-    @local_registry.add("test_func")
-    def test_func(data: NDArray[np.floating], weights: NDArray[np.floating]) -> float:
-        return compute_weighted_aggregate(data=data, weights=weights)
-
-    assert local_registry.content == ["test_func"]
-    statistic_fn = local_registry.get("test_func")
-    actual = statistic_fn(data=data_random, weights=weights_random)
-    expected = compute_weighted_aggregate(data=data_random, weights=weights_random)
-    np.testing.assert_allclose(actual, expected)
-
-    with pytest.raises(ValueError):
-
-        @local_registry.add("test_func")
-        def test_func2(
-            data: NDArray[np.floating],
-            weights: NDArray[np.floating],
-        ) -> float:
-            return compute_weighted_aggregate(data=data, weights=weights)
 
 
 @pytest.mark.parametrize(
@@ -84,8 +56,8 @@ def test_statistic_registry(
     ],
 )
 def test_compute_weighted_aggregate(
-    data_constant: NDArray[np.floating],
-    weights_random: NDArray[np.floating],
+    data_constant: FArray,
+    weights_random: FArray,
     factor: Optional[int],
     expected: float,
 ) -> None:
@@ -108,8 +80,8 @@ def test_compute_weighted_aggregate(
     ],
 )
 def test_compute_weighted_aggregate_fail(
-    data: NDArray[np.floating],
-    weights: NDArray[np.floating],
+    data: FArray,
+    weights: FArray,
 ) -> None:
     with pytest.raises(ValueError):
         _ = compute_weighted_aggregate(
@@ -119,8 +91,8 @@ def test_compute_weighted_aggregate_fail(
 
 
 def test_compute_weighted_mean_0(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
 ) -> None:
     actual = compute_weighted_mean(data=data_random, weights=weights_constant)
     expected = np.mean(data_random)
@@ -128,8 +100,8 @@ def test_compute_weighted_mean_0(
 
 
 def test_compute_weighted_mean_1(
-    data_constant: NDArray[np.floating],
-    weights_random: NDArray[np.floating],
+    data_constant: FArray,
+    weights_random: FArray,
 ) -> None:
     actual = compute_weighted_mean(data=data_constant, weights=weights_random)
     expected = np.mean(data_constant)
@@ -137,8 +109,8 @@ def test_compute_weighted_mean_1(
 
 
 def test_compute_weighted_sum_0(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
 ) -> None:
     actual = compute_weighted_sum(data=data_random, weights=weights_constant)
     expected = np.sum(data_random)
@@ -146,8 +118,8 @@ def test_compute_weighted_sum_0(
 
 
 def test_compute_weighted_sum_1(
-    data_constant: NDArray[np.floating],
-    weights_random: NDArray[np.floating],
+    data_constant: FArray,
+    weights_random: FArray,
 ) -> None:
     actual = compute_weighted_sum(data=data_constant, weights=weights_random)
     expected = np.sum(data_constant)
@@ -156,8 +128,8 @@ def test_compute_weighted_sum_1(
 
 @pytest.mark.parametrize("ddof", [pytest.param(0), pytest.param(1)])
 def test_compute_weighted_variance(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     ddof: int,
 ) -> None:
     actual = compute_weighted_variance(
@@ -171,8 +143,8 @@ def test_compute_weighted_variance(
 
 @pytest.mark.parametrize("ddof", [pytest.param(0), pytest.param(1)])
 def test_compute_weighted_std(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     ddof: int,
 ) -> None:
     actual = compute_weighted_std(data=data_random, weights=weights_constant, ddof=ddof)
@@ -182,9 +154,9 @@ def test_compute_weighted_std(
 
 @pytest.mark.parametrize("ddof", [pytest.param(0), pytest.param(1)])
 def test_compute_weighted_pearson_dependency(
-    data_random: NDArray[np.floating],
-    data_dependent: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    data_dependent: FArray,
+    weights_constant: FArray,
     ddof: int,
 ) -> None:
     actual = compute_weighted_pearson_dependency(
@@ -209,8 +181,8 @@ def test_compute_weighted_pearson_dependency(
     ],
 )
 def test_compute_weighted_median(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     use_sorter: bool,
 ) -> None:
     actual = compute_weighted_median(
@@ -238,8 +210,8 @@ def test_compute_weighted_median(
     ],
 )
 def test_compute_weighted_quantile(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     quantile: float,
     use_sorter: bool,
 ) -> None:
@@ -261,8 +233,8 @@ def test_compute_weighted_quantile(
     ],
 )
 def test_compute_weighted_quantile_underflow(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     quantile: float,
 ) -> None:
     actual = compute_weighted_quantile(
@@ -283,8 +255,8 @@ def test_compute_weighted_quantile_underflow(
     ],
 )
 def test_compute_weighted_quantile_overflow(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     quantile: float,
 ) -> None:
     actual = compute_weighted_quantile(
@@ -313,8 +285,8 @@ def test_compute_weighted_quantile_overflow(
     ],
 )
 def test_compute_weighted_percentile(
-    data_random: NDArray[np.floating],
-    weights_constant: NDArray[np.floating],
+    data_random: FArray,
+    weights_constant: FArray,
     percentile: float,
     use_sorter: bool,
 ) -> None:

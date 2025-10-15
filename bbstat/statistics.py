@@ -5,16 +5,13 @@ statistics.py
 Type definitions, function protocols, and a registry of weighted statistical functions
 for use in bootstrap resampling and analysis.
 
-This module defines flexible types and interfaces for statistical functions that operate
-on weighted data, particularly in the context of Bayesian bootstrap procedures. It includes
-a function registry (`Registry`) for registering and retrieving statistic functions by name,
-and provides a collection of pre-defined weighted statistics (e.g., mean, variance, quantile).
+This module defines types for statistical functions that operate on weighted data,
+particularly in the context of Bayesian bootstrap procedures. It provides a collection
+of pre-defined weighted statistics (e.g., mean, variance, quantile).
 
 Key Features
 ------------
-- Type aliases for weighted data and function signatures.
-- Protocols for defining callables that conform to the statistical function interface.
-- A `Registry` class for dynamically registering and retrieving statistic functions.
+- Type aliases for data and weights.
 - A library of built-in weighted statistical functions (e.g., mean, std, quantile, etc.)
 
 Type Aliases
@@ -22,65 +19,29 @@ Type Aliases
 - `FArray`: Alias for `NDArray[np.floating]`, used for floating-point data and weights.
 - `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
 - `FFArray`, `IFArray`: Tuples of data arrays used in bivariate computations.
-- `StatisticFunctionDataInput`: Union type for valid input formats accepted by statistic functions.
 
-Protocols
----------
-- `StatisticFunction`: Interface for a statistic function that accepts typed data and weights.
-- `RawStatisticFunction`: A more permissive protocol used internally by the registry.
-
-Statistic Function Registry
----------------------------
-The `Registry` class allows users to register new statistic functions using a decorator syntax.
-All registered functions must follow the `RawStatisticFunction` protocol.
-
-Example:
-    >>> registry = Registry()
-    >>> @registry.add("mean")
-    >>> def my_weighted_mean(data, weights):
-    >>>     return np.sum(data * weights)
-    >>> registry.get("mean")
-    <function my_weighted_mean at 0x...>
-
-Built-in Registered Functions
------------------------------
-- `"aggregate"`: Weighted dot product, optionally scaled by a factor (internal use only).
-- `"mean"`: Weighted arithmetic mean.
-- `"sum"`: Weighted sum.
-- `"variance"`: Weighted variance with optional degrees of freedom correction.
-- `"std"`: Weighted standard deviation.
-- `"quantile"` / `"percentile"`: Weighted quantile estimation.
-- `"median"`: Weighted median.
-- `"pearson_dependency"`: Weighted Pearson correlation for two variables.
-- `"spearman_dependency"`: Weighted Spearman correlation.
-- `"eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
-
-Usage Example
--------------
->>> from bbstat.statistics import registry
->>> stat_fn = registry.get("mean")
->>> result = stat_fn(data, weights)
+Built-in Functions
+------------------
+- `"compute_weighted_aggregate"`: Weighted dot product, optionally scaled by a factor (internal use only).
+- `"compute_weighted_mean"`: Weighted arithmetic mean.
+- `"compute_weighted_sum"`: Weighted sum.
+- `"compute_weighted_variance"`: Weighted variance with optional degrees of freedom correction.
+- `"compute_weighted_std"`: Weighted standard deviation.
+- `"compute_weighted_quantile"` / `"compute_weighted_percentile"`: Weighted quantile estimation.
+- `"compute_weighted_median"`: Weighted median.
+- `"compute_weighted_pearson_dependency"`: Weighted Pearson correlation for two variables.
+- `"compute_weighted_spearman_dependency"`: Weighted Spearman correlation.
+- `"compute_weighted_eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
 
 Notes
 -----
-- All registered functions assume normalized weights (i.e., sum to 1).
+- All functions assume normalized weights (i.e., sum to 1).
 - Functions raise `ValueError` for invalid shapes, mismatched dimensions, or inappropriate input types.
 - This module is intended for use with `bootstrap`, which applies these functions across bootstrap resamples.
-
 """
 
 import math
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    Tuple,
-    TypeAlias,
-    TypeVar,
-    Union,
-)
+from typing import Optional, Tuple, TypeAlias, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -90,124 +51,12 @@ FArray: TypeAlias = NDArray[np.floating]
 IArray: TypeAlias = NDArray[np.integer]
 FFArray: TypeAlias = Tuple[FArray, FArray]
 IFArray: TypeAlias = Tuple[IArray, FArray]
-StatisticFunctionDataInput: TypeAlias = Union[
-    FArray,
-    FFArray,
-    IFArray,
-    List[FArray],
-    List[Union[IArray, FArray]],
-]
-
-T = TypeVar("T", bound=StatisticFunctionDataInput, contravariant=True)
 
 
-class StatisticFunction(Protocol[T]):
-    def __call__(self, data: T, weights: FArray, **kwargs: Dict[str, Any]) -> float: ...
-
-
-class RawStatisticFunction(Protocol):
-    def __call__(
-        self, data: Any, weights: FArray, **kwargs: Dict[str, Any]
-    ) -> float: ...
-
-
-class Registry:
-    """
-    A simple registry class for storing and managing statistic functions.
-
-    This class provides a way to register and retrieve statistic functions by name.
-    It includes functionality to add a new function to the registry, access the
-    registered functions by name, and list all registered function names.
-
-    Attributes:
-        _registry (Dict[str, RawStatisticFunction]): A dictionary mapping function
-            names (str) to their corresponding statistic functions.
-
-    Methods:
-        content (property): Returns a list of all registered function names.
-        add(name: str): Registers a statistic function under a specified name.
-        get(name: str): Retrieves a registered statistic function by its name.
-
-    Example:
-        >>> registry = Registry()
-        >>> @registry.add('mean')
-        >>> def mean_fn(data):
-        >>>     return np.mean(data)
-        >>> mean_fn = registry.get('mean')
-        >>> print(mean_fn)
-        <function mean_fn at 0x...>
-
-    Raises:
-        ValueError: If a function name already exists when trying to add a new
-            one or if a name is not found when trying to retrieve a function.
-    """
-
-    def __init__(self):
-        """Initializes a new empty registry."""
-        self._registry: Dict[str, RawStatisticFunction] = {}
-
-    @property
-    def content(self) -> List[str]:
-        """Returns a list of all the names of the registered statistic functions."""
-        return list(self._registry.keys())
-
-    def add(self, name: str):
-        """
-        Registers a new statistic function under a given name.
-
-        This method registers a new statistic function to the registry. If the name
-        is already taken, a `ValueError` is raised. The function must be decorated
-        with this method.
-
-        Args:
-            name (str): The name under which the statistic function will be registered.
-
-        Returns:
-            Callable: A decorator function that registers a statistic function.
-
-        Raises:
-            ValueError: If the name is already taken in the registry.
-        """
-        if name in self._registry:
-            raise ValueError(f"Invalid parameter {name=:}: exists already.")
-
-        def decorator(statistic_fn: RawStatisticFunction):
-            self._registry[name] = statistic_fn
-            return statistic_fn
-
-        return decorator
-
-    def get(self, name: str) -> RawStatisticFunction:
-        """
-        Retrieves a statistic function by its name from the registry.
-
-        This method returns the statistic function associated with the given name.
-        If the name is not found in the registry, a `ValueError` is raised.
-
-        Args:
-            name (str): The name of the statistic function to retrieve.
-
-        Returns:
-            RawStatisticFunction: The statistic function registered under the given name.
-
-        Raises:
-            ValueError: If the name is not found in the registry.
-        """
-        try:
-            return self._registry[name]
-        except KeyError:
-            raise ValueError(
-                f"Invalid parameter {name=:}: not found, choose from {self.content}."
-            )
-
-
-registry = Registry()
-
-
-@registry.add("aggregate")
 def compute_weighted_aggregate(
     data: FArray,
     weights: FArray,
+    *,
     factor: Optional[float] = None,
 ) -> float:
     """
@@ -246,7 +95,7 @@ def compute_weighted_aggregate(
         The optional `factor` scales the result of this dot product. If no factor is given,
         the aggregation computes the weighted arithmetic mean of the data; if instead the factor
         equals the length of the data array, the aggregation computes the weighted sum.
-        This function is registered under the name "aggregate".
+
     """
     if data.ndim != 1:
         raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
@@ -263,7 +112,6 @@ def compute_weighted_aggregate(
     return aggregate.item()
 
 
-@registry.add("mean")
 def compute_weighted_mean(
     data: FArray,
     weights: FArray,
@@ -292,14 +140,10 @@ def compute_weighted_mean(
         >>> weights = np.array([0.2, 0.5, 0.3])
         >>> compute_weighted_mean(data, weights)
         2.1
-
-    Notes:
-        This function is registered under the name "mean".
     """
     return compute_weighted_aggregate(data=data, weights=weights, factor=None)
 
 
-@registry.add("sum")
 def compute_weighted_sum(
     data: FArray,
     weights: FArray,
@@ -329,17 +173,14 @@ def compute_weighted_sum(
         >>> weights = np.array([0.2, 0.5, 0.3])
         >>> compute_weighted_sum(data, weights)
         6.3
-
-    Notes:
-        This function is registered under the name "sum".
     """
     return compute_weighted_aggregate(data=data, weights=weights, factor=len(data))
 
 
-@registry.add("variance")
 def compute_weighted_variance(
     data: FArray,
     weights: FArray,
+    *,
     weighted_mean: Optional[float] = None,
     ddof: int = 0,
 ) -> float:
@@ -375,9 +216,6 @@ def compute_weighted_variance(
         0.49
         >>> compute_weighted_variance(data, weights, ddof=1)
         0.735
-
-    Notes:
-        This function is registered under the name "variance".
     """
     if weighted_mean is None:
         weighted_mean = compute_weighted_mean(data=data, weights=weights)
@@ -388,10 +226,10 @@ def compute_weighted_variance(
     )
 
 
-@registry.add("std")
 def compute_weighted_std(
     data: FArray,
     weights: FArray,
+    *,
     weighted_mean: Optional[float] = None,
     ddof: int = 0,
 ) -> float:
@@ -425,9 +263,6 @@ def compute_weighted_std(
         >>> weights = np.array([0.2, 0.5, 0.3])
         >>> compute_weighted_std(data, weights)
         0.7
-
-    Notes:
-        This function is registered under the name "std".
     """
     weighted_variance = compute_weighted_variance(
         data=data,
@@ -438,10 +273,10 @@ def compute_weighted_std(
     return math.sqrt(weighted_variance)
 
 
-@registry.add("quantile")
 def compute_weighted_quantile(
     data: FArray,
     weights: FArray,
+    *,
     quantile: float,
     sorter: Optional[IArray] = None,
 ) -> float:
@@ -484,7 +319,6 @@ def compute_weighted_quantile(
           the largest data point is returned.
         - Linear interpolation is used between the two closest surrounding data points.
         - Providing a precomputed `sorter` can optimize performance in repeated calls.
-        - This function is registered under the name "quantile".
     """
     if data.ndim != 1:
         raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
@@ -513,10 +347,10 @@ def compute_weighted_quantile(
     return (s_lo + w * (s_hi - s_lo)).item()
 
 
-@registry.add("percentile")
 def compute_weighted_percentile(
     data: FArray,
     weights: FArray,
+    *,
     percentile: float,
     sorter: Optional[NDArray[np.integer]] = None,
 ) -> float:
@@ -547,9 +381,6 @@ def compute_weighted_percentile(
         >>> weights = np.array([0.2, 0.5, 0.3])
         >>> compute_weighted_percentile(data, weights, percentile=70)
         2.2
-
-    Notes:
-        This function is registered under the name "percentile".
     """
     return compute_weighted_quantile(
         data=data,
@@ -559,10 +390,10 @@ def compute_weighted_percentile(
     )
 
 
-@registry.add("median")
 def compute_weighted_median(
     data: FArray,
     weights: FArray,
+    *,
     sorter: Optional[NDArray[np.integer]] = None,
 ) -> float:
     """
@@ -591,9 +422,6 @@ def compute_weighted_median(
         >>> weights = np.array([0.4, 0.2, 0.4])
         >>> compute_weighted_median(data, weights)
         2.25
-
-    Notes:
-        This function is registered under the name "median".
     """
     return compute_weighted_quantile(
         data=data,
@@ -603,10 +431,10 @@ def compute_weighted_median(
     )
 
 
-@registry.add("pearson_dependency")
 def compute_weighted_pearson_dependency(
     data: FFArray,
     weights: FArray,
+    *,
     ddof: int = 0,
 ) -> float:
     """
@@ -649,7 +477,6 @@ def compute_weighted_pearson_dependency(
           where z1 and z2 are the standardized variables.
         - The result is bounded between -1 (perfect negative linear relationship)
           and 1 (perfect positive linear relationship), with 0 indicating no linear dependency.
-        - This function is registered under the name "pearson_dependency".
     """
     data_1, data_2 = data
     weighted_mean_1 = compute_weighted_mean(data=data_1, weights=weights)
@@ -671,10 +498,10 @@ def compute_weighted_pearson_dependency(
     return compute_weighted_mean(data=array_1 * array_2, weights=weights)
 
 
-@registry.add("spearman_dependency")
 def compute_weighted_spearman_dependency(
     data: FFArray,
     weights: FArray,
+    *,
     ddof: int = 0,
 ) -> float:
     """
@@ -714,11 +541,10 @@ def compute_weighted_spearman_dependency(
           and 1 (perfect direct monotonic relationship), with 0 indicating no
           monotonic correlation.
         - Weights are applied after ranking.
-        - This function is registered under the name "spearman_dependency".
     """
     data_1, data_2 = data
-    ranks_1 = rankdata(data_1)
-    ranks_2 = rankdata(data_2)
+    ranks_1 = cast(FArray, rankdata(data_1))
+    ranks_2 = cast(FArray, rankdata(data_2))
     return compute_weighted_pearson_dependency(
         data=(ranks_1, ranks_2),
         weights=weights,
@@ -726,7 +552,6 @@ def compute_weighted_spearman_dependency(
     )
 
 
-@registry.add("eta_square_dependency")
 def compute_weighted_eta_square_dependency(
     data: IFArray,
     weights: FArray,
@@ -767,7 +592,6 @@ def compute_weighted_eta_square_dependency(
         - The statistic is sensitive to group sizes and imbalance in weights.
         - When all group means equal the global mean, η² is 0.
         - When groups are perfectly separated by the numeric variable, η² is 1.
-        - This function is registered under the name "eta_square_dependency".
     """
     data_cat, data_num = data
     mean_sample = compute_weighted_mean(data=data_num, weights=weights)
