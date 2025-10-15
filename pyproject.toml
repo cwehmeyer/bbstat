@@ -8,6 +8,21 @@ requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = ["numpy >= 1.21", "scipy >= 1.11"]
 
+[tool.setuptools]
+packages = ["bbstat"]
+
+[tool.mypy]
+check_untyped_defs = true
+
+[tool.mkdocs]
+site_name = "Your Project Docs"
+theme.name = "material"
+config_file = "mkdocs.yml"
+plugins = [
+    "mkdocstrings[python]",
+    "search"
+]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -17,6 +32,14 @@ test = [
     "pytest >= 7.0",
     "pytest-cov",
     "scipy-stubs",
+]
+docs = [
+    "mkdocs",
+    "mkdocs-autorefs",
+    "mkdocs-get-deps",
+    "mkdocs-material",
+    "mkdocs-material-extensions",
+    "mkdocstrings[python]",
 ]
 dev = [
     "tox",
