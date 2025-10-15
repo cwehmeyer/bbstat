@@ -36,7 +36,8 @@ See the `resample` function docstring for complete usage details.
 from typing import Generator, Optional
 
 import numpy as np
-from numpy.typing import NDArray
+
+from .statistics import FArray
 
 
 def resample(
@@ -44,7 +45,7 @@ def resample(
     n_data: int,
     seed: Optional[int] = None,
     blocksize: Optional[int] = None,
-) -> Generator[NDArray[np.floating], None, None]:
+) -> Generator[FArray, None, None]:
     """
     Generates bootstrap resamples with Dirichlet-distributed weights.
 
@@ -57,14 +58,14 @@ def resample(
         n_boot (int): The total number of bootstrap resamples to generate.
         n_data (int): The number of data points to resample (used for the dimension of the
             Dirichlet distribution).
-        seed (Optional[int]): A random seed for reproducibility (default is `None` for
+        seed (int, optional): A random seed for reproducibility (default is `None` for
             random seeding).
-        blocksize (Optional[int]): The number of resamples to generate in each block.
+        blocksize (int, optional): The number of resamples to generate in each block.
             If `None`, the entire number of resamples is generated in one block.
             Defaults to `None`.
 
     Yields:
-        Generator[NDArray[np.floating], None, None]: A generator that yields each resample
+        Generator[FArray, None, None]: A generator that yields each resample
             (a 1D array of floats) as it is generated. Each resample contains Dirichlet-
             distributed weights for the given `n_data`.
 
