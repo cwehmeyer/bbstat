@@ -1,5 +1,6 @@
 """
 bbstat: Bayesian Bootstrap Utilities
+====================================
 
 This package provides tools for performing and evaluating the Bayesian bootstrap,
 a resampling method based on the Bayesian interpretation of uncertainty.
@@ -10,11 +11,12 @@ Main Features:
 - `BootstrapResult`: Analyze bootstrap outcomes with mean estimates and credibility intervals.
 - `credibility_interval`: Compute one-dimensional credibility intervals from samples.
 - `resample`: Generate weighted samples using the Dirichlet distribution.
+- `statistics`: Collection of built-in weighted statistics.
 
 Supported Statistic Functions:
 ------------------------------
 Custom statistic functions must accept the signature:
-    (data: ..., weights: NDarray[np.floating], **kwargs) -> float
+    (data: ..., weights: numpy.typing.NDarray[numpy.floating], **kwargs) -> float
 
 Compatible examples in bbstat.statistics include:
 - `compute_weighted_mean`: Weighted mean
@@ -24,14 +26,13 @@ Compatible examples in bbstat.statistics include:
 - `compute_weighted_spearman_dependency`: Weighted Spearman correlation
 - `compute_weighted_eta_square_dependency`: Weighted eta-squared for categorical group differences
 
-You can register your own functions using `statistics.registry.add("your_name")`.
-
 Modules:
 --------
 - `bootstrap`: Core logic for Bayesian bootstrap
 - `evaluate`: Tools for summarizing bootstrap results
+- `registry`: Registry for built-in statistic functions
 - `resample`: Weighted resampling function
-- `statistics`: Registry and built-in statistic functions
+- `statistics`: Built-in statistic functions
 """
 
 from bbstat.evaluate import BootstrapResult, credibility_interval
