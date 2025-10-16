@@ -1,34 +1,29 @@
-"""
-resample.py
-===========
-
-Bootstrap resampling utilities using Dirichlet-distributed weights.
+"""Bootstrap resampling utilities using Dirichlet-distributed weights.
 
 This module provides functionality for generating bootstrap resamples via the Bayesian
 bootstrap method, where resamples are weighted using samples from a Dirichlet distribution.
 It is intended for internal use within higher-level resampling and estimation workflows.
 
-The primary function, `resample`, yields weighted resamples suitable for estimating
+The function `resample` yields weighted resamples suitable for estimating
 statistics under uncertainty without making parametric assumptions.
 
-Features:
----------
-- Dirichlet-based resampling for Bayesian bootstrap.
-- Support for blockwise resample generation to control memory usage.
-- Optional random seed for reproducibility.
-- Generator interface for efficient streaming of resample weights.
+Main Features:
+    - Dirichlet-based resampling for Bayesian bootstrap.
+    - Support for blockwise resample generation to control memory usage.
+    - Optional random seed for reproducibility.
+    - Generator interface for efficient streaming of resample weights.
 
-Typical usage:
---------------
->>> from bbstat.resample import resample
->>> for weights in resample(n_boot=1000, n_data=50):
->>>     # Apply weights to compute statistic
->>>     ...
+Example:
+    ```python
+    from bbstat.resample import resample
+    for weights in resample(n_boot=1000, n_data=50):
+        # Apply weights to compute statistic
+        ...
+    ```
 
 Notes:
-------
-- The function is designed to scale to large numbers of resamples.
-- It is most useful as a low-level utility within a bootstrap framework.
+    - The function is designed to scale to large numbers of resamples.
+    - It is most useful as a low-level utility within a bootstrap framework.
 
 See the `resample` function docstring for complete usage details.
 """
@@ -72,8 +67,10 @@ def resample(
             distributed weights for the given `n_data`.
 
     Example:
-        >>> for r in resample(n_boot=10, n_data=5):
-        >>>     print(r)
+        ```python
+        for r in resample(n_boot=10, n_data=5):
+            print(r)
+        ```
 
     Notes:
         - If `blocksize` is specified, the resampling will be performed in smaller blocks,

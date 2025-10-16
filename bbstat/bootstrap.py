@@ -1,8 +1,4 @@
-"""
-bootstrap.py
-============
-
-Bayesian bootstrap resampling for statistical estimation and uncertainty quantification.
+"""Bayesian bootstrap resampling for statistical estimation and uncertainty quantification.
 
 This module provides the `bootstrap` function, which applies the Bayesian bootstrap
 resampling method to estimate a statistic (such as the mean or median) along with its
@@ -14,21 +10,21 @@ quantifying uncertainty through resampling is critical. It is particularly well-
 for small to moderate datasets and non-parametric inference.
 
 Main Features:
---------------
-- Resampling via the Bayesian bootstrap method.
-- Support for scalar or multivariate data inputs.
-- Use of string-based or function-based statistic definitions.
-- Configurable number of resamples and credibility interval coverage.
-- Optional blockwise resampling for structured data.
-- Random seed control for reproducibility.
+    - Resampling via the Bayesian bootstrap method.
+    - Support for scalar or multivariate data inputs.
+    - Use of string-based or function-based statistic definitions.
+    - Configurable number of resamples and credibility interval coverage.
+    - Optional blockwise resampling for structured data.
+    - Random seed control for reproducibility.
 
 Example:
---------
->>> import numpy as np
->>> from bbstat.bootstrap import bootstrap
->>> data = np.random.randn(100)
->>> result = bootstrap(data, statistic_fn="mean")
->>> print(result)
+    ```python
+    import numpy as np
+    from bbstat.bootstrap import bootstrap
+    data = np.random.randn(100)
+    result = bootstrap(data, statistic_fn="mean")
+    print(result)
+    ```
 
 See the function-level docstring of `bootstrap` for full details.
 """
@@ -85,11 +81,13 @@ def bootstrap(
         ValueError: If any data array is not 1D or if the dimensions of the input arrays do not match.
 
     Example:
-        >>> data = np.random.randn(100)  # 1D array of data
-        >>> statistic_fn = "mean"  # Assuming "mean" is a registered statistic function
-        >>> result = bootstrap(data, statistic_fn)
-        >>> print(result.mean)
-        >>> print(result.ci)
+        ```python
+        data = np.random.randn(100)
+        statistic_fn = "mean"
+        result = bootstrap(data, statistic_fn)
+        print(result.mean)
+        print(result.ci)
+        ```
 
     Notes:
         - The `data` argument can be a single 1D array, or a tuple or list of 1D arrays where each array

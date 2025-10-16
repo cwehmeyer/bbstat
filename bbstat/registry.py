@@ -1,8 +1,4 @@
-"""
-registry.py
-===========
-
-Statistic function registry and protocol definition.
+"""Statistic function registry and protocol definition.
 
 This module defines a strict `Protocol` (`StatisticFunction`) for all supported
 statistical aggregation functions used in the system. It also provides a typed

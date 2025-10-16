@@ -1,43 +1,34 @@
-"""
-statistics.py
-=============
-
-Type definitions, function protocols, and a registry of weighted statistical functions
-for use in bootstrap resampling and analysis.
+"""Type definitions and weighted statistical functions for use in bootstrap resampling and analysis.
 
 This module defines types for statistical functions that operate on weighted data,
 particularly in the context of Bayesian bootstrap procedures. It provides a collection
 of pre-defined weighted statistics (e.g., mean, variance, quantile).
 
-Key Features
-------------
-- Type aliases for data and weights.
-- A library of built-in weighted statistical functions (e.g., mean, std, quantile, etc.)
+Main Features:
+    - Type aliases for data and weights.
+    - A library of built-in weighted statistical functions (e.g., mean, std, quantile, etc.)
 
-Type Aliases
-------------
-- `FArray`: Alias for `FArray`, used for floating-point data and weights.
-- `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
-- `FFArray`, `IFArray`: Tuples of data arrays used in bivariate computations.
+Type Aliases:
+    - `FArray`: Alias for `FArray`, used for floating-point data and weights.
+    - `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
+    - `FFArray`, `IFArray`: Tuples of data arrays used in bivariate computations.
 
-Built-in Functions
-------------------
-- `"compute_weighted_aggregate"`: Weighted dot product, optionally scaled by a factor (internal use only).
-- `"compute_weighted_mean"`: Weighted arithmetic mean.
-- `"compute_weighted_sum"`: Weighted sum.
-- `"compute_weighted_variance"`: Weighted variance with optional degrees of freedom correction.
-- `"compute_weighted_std"`: Weighted standard deviation.
-- `"compute_weighted_quantile"` / `"compute_weighted_percentile"`: Weighted quantile estimation.
-- `"compute_weighted_median"`: Weighted median.
-- `"compute_weighted_pearson_dependency"`: Weighted Pearson correlation for two variables.
-- `"compute_weighted_spearman_dependency"`: Weighted Spearman correlation.
-- `"compute_weighted_eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
+Built-in Functions:
+    - `"compute_weighted_aggregate"`: Weighted dot product, optionally scaled by a factor (internal use only).
+    - `"compute_weighted_mean"`: Weighted arithmetic mean.
+    - `"compute_weighted_sum"`: Weighted sum.
+    - `"compute_weighted_variance"`: Weighted variance with optional degrees of freedom correction.
+    - `"compute_weighted_std"`: Weighted standard deviation.
+    - `"compute_weighted_quantile"` / `"compute_weighted_percentile"`: Weighted quantile estimation.
+    - `"compute_weighted_median"`: Weighted median.
+    - `"compute_weighted_pearson_dependency"`: Weighted Pearson correlation for two variables.
+    - `"compute_weighted_spearman_dependency"`: Weighted Spearman correlation.
+    - `"compute_weighted_eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
 
-Notes
------
-- All functions assume normalized weights (i.e., sum to 1).
-- Functions raise `ValueError` for invalid shapes, mismatched dimensions, or inappropriate input types.
-- This module is intended for use with `bootstrap`, which applies these functions across bootstrap resamples.
+Notes:
+    - All functions assume normalized weights (i.e., sum to 1).
+    - Functions raise `ValueError` for invalid shapes, mismatched dimensions, or inappropriate input types.
+    - This module is intended for use with `bootstrap`, which applies these functions across bootstrap resamples.
 """
 
 import math
@@ -101,12 +92,12 @@ def compute_weighted_aggregate(
         ValueError: If the shapes of `data` and `weights` do not match.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_aggregate(data, weights)
-        2.1
-        >>> compute_weighted_aggregate(data, weights, factor=1.5)
-        3.15
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_aggregate(data, weights))  # => 2.1
+        print(compute_weighted_aggregate(data, weights, factor=1.5))  # => 3.15
+        ```
 
     Notes:
         The weighted aggregate is computed using the dot product between `data` and `weights`.
@@ -154,10 +145,11 @@ def compute_weighted_mean(
         ValueError: If the shapes of `data` and `weights` do not match.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_mean(data, weights)
-        2.1
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_mean(data, weights))  # => 2.1
+        ```
     """
     return compute_weighted_aggregate(data=data, weights=weights, factor=None)
 
@@ -187,10 +179,11 @@ def compute_weighted_sum(
         ValueError: If the shapes of `data` and `weights` do not match.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_sum(data, weights)
-        6.3
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_sum(data, weights))  # => 6.3
+        ```
     """
     return compute_weighted_aggregate(data=data, weights=weights, factor=len(data))
 
@@ -228,12 +221,12 @@ def compute_weighted_variance(
         ValueError: If the shapes of `data` and `weights` do not match.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_variance(data, weights)
-        0.49
-        >>> compute_weighted_variance(data, weights, ddof=1)
-        0.735
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_variance(data, weights))  # => 0.49
+        print(compute_weighted_variance(data, weights, ddof=1))  # => 0.735
+        ```
     """
     if weighted_mean is None:
         weighted_mean = compute_weighted_mean(data=data, weights=weights)
@@ -277,10 +270,11 @@ def compute_weighted_std(
         ValueError: If the shapes of `data` and `weights` do not match.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_std(data, weights)
-        0.7
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_std(data, weights))  # => 0.7
+        ```
     """
     weighted_variance = compute_weighted_variance(
         data=data,
@@ -325,10 +319,11 @@ def compute_weighted_quantile(
         ValueError: If `data` and `weights` have different shapes or are not 1D.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_quantile(data, weights, quantile=0.7)
-        2.2
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_quantile(data, weights, quantile=0.7))  # => 2.2
+        ```
 
     Notes:
         - If `quantile` is less than or equal to the minimum cumulative weight,
@@ -395,10 +390,11 @@ def compute_weighted_percentile(
         ValueError: If `data` and `weights` have different shapes or are not 1D.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_percentile(data, weights, percentile=70)
-        2.2
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_percentile(data, weights, percentile=70))  # => 2.2
+        ```
     """
     return compute_weighted_quantile(
         data=data,
@@ -436,10 +432,11 @@ def compute_weighted_median(
         ValueError: If `data` and `weights` have different shapes or are not 1D.
 
     Example:
-        >>> data = np.array([1.0, 2.0, 3.0])
-        >>> weights = np.array([0.4, 0.2, 0.4])
-        >>> compute_weighted_median(data, weights)
-        2.25
+        ```python
+        data = np.array([1.0, 2.0, 3.0])
+        weights = np.array([0.4, 0.2, 0.4])
+        print(compute_weighted_median(data, weights))  # => 2.25
+        ```
     """
     return compute_weighted_quantile(
         data=data,
@@ -482,11 +479,12 @@ def compute_weighted_pearson_dependency(
         ValueError: If the input arrays are not 1D or have mismatched lengths.
 
     Example:
-        >>> data_1 = np.array([1.0, 2.0, 3.0])
-        >>> data_2 = np.array([1.0, 2.0, 2.9])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_pearson_dependency((data_1, data_2), weights)
-        0.998...
+        ```python
+        data_1 = np.array([1.0, 2.0, 3.0])
+        data_2 = np.array([1.0, 2.0, 2.9])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_pearson_dependency((data_1, data_2), weights))  # => 0.998...
+        ```
 
     Notes:
         - The function relies on `compute_weighted_mean` and `compute_weighted_std`.
@@ -544,11 +542,12 @@ def compute_weighted_spearman_dependency(
         ValueError: If the input arrays are not 1D or have mismatched lengths.
 
     Example:
-        >>> data_1 = np.array([1.0, 2.0, 3.0])
-        >>> data_2 = np.array([0.3, 0.2, 0.1])
-        >>> weights = np.array([0.2, 0.5, 0.3])
-        >>> compute_weighted_spearman_dependency((data_1, data_2), weights)
-        -0.9999...
+        ```python
+        data_1 = np.array([1.0, 2.0, 3.0])
+        data_2 = np.array([0.3, 0.2, 0.1])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_spearman_dependency((data_1, data_2), weights))  # => -0.9999...
+        ```
 
     Notes:
         - Internally, ranks are computed using `scipy.stats.rankdata`, which handles ties
@@ -597,11 +596,12 @@ def compute_weighted_eta_square_dependency(
         ValueError: If input arrays are not 1D or do not have matching shapes.
 
     Example:
-        >>> data_cat = np.array([0, 0, 1, 1])
-        >>> data_num = np.array([1.0, 2.0, 3.0, 4.0])
-        >>> weights = np.array([0.25, 0.25, 0.25, 0.25)
-        >>> compute_weighted_eta_square_dependency((data_cat, data_num), weights)
-        0.8
+        ```python
+        data_cat = np.array([0, 0, 1, 1])
+        data_num = np.array([1.0, 2.0, 3.0, 4.0])
+        weights = np.array([0.25, 0.25, 0.25, 0.25)
+        print(compute_weighted_eta_square_dependency((data_cat, data_num), weights))  # => 0.8
+        ```
 
     Notes:
         - Internally, η² is computed as the ratio of weighted between-group variance

@@ -1,32 +1,27 @@
-"""
-evaluate.py
-===========
-
-Evaluation utilities for summarizing bootstrap resampling results.
+"""Evaluation utilities for summarizing bootstrap resampling results.
 
 This module provides functions and data structures for interpreting and summarizing
 the output of Bayesian bootstrap resampling procedures. It includes tools to compute
 credibility intervals for statistical estimates and to encapsulate the results of a
 bootstrap analysis in a convenient data class.
 
-Contents:
----------
-- `credibility_interval`: Computes a credibility interval from a set of estimates.
-- `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
-  and automatically evaluates the credibility interval.
+Main Features:
+    - `credibility_interval`: Computes a credibility interval from a set of estimates.
+    - `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
+      and automatically evaluates the credibility interval.
 
-Typical usage:
---------------
->>> from bbstat.evaluate import BootstrapResult
->>> result = BootstrapResult(estimates=np.array([1.2, 2.3, 2.9]), coverage=0.87)
->>> print(result)
+Example:
+    ```python
+    from bbstat.evaluate import BootstrapResult
+    result = BootstrapResult(estimates=np.array([5.0, 2.3, 2.9]), coverage=0.95)
+    print(result)  # => BootstrapResult(mean=3.4, ci=(2.3, 4.9), coverage=0.95, n_boot=3)
+    ```
 
 Notes:
-------
-- The credibility interval is calculated using quantiles of the empirical distribution
-  of bootstrap estimates.
-- This module is designed to be used alongside the `bootstrap` and `resample` modules
-  to provide complete statistical summaries of resampled data.
+    - The credibility interval is calculated using quantiles of the empirical distribution
+      of bootstrap estimates.
+    - This module is designed to be used alongside the `bootstrap` and `resample` modules
+      to provide complete statistical summaries of resampled data.
 """
 
 import math
@@ -72,11 +67,12 @@ def credibility_interval(
         ValueError: If `estimates` is not a 1D array or if `coverage` is not between 0 and 1
             (exclusive).
 
-    Examples:
-        >>> import numpy as np
-        >>> estimates = np.array([1.1, 2.3, 3.5, 2.9, 4.0])
-        >>> credibility_interval(estimates, 0.6)
-        (2.06, 3.6)
+    Example:
+        ```python
+        import numpy as np
+        estimates = np.array([1.1, 2.3, 3.5, 2.9, 4.0])
+        credibility_interval(estimates, 0.6)  # => (2.06, 3.6)
+        ```
     """
     if estimates.ndim != 1:
         raise ValueError(f"Invalid parameter {estimates.ndim=:}: must be 1D array.")
