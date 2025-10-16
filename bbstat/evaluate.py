@@ -37,6 +37,11 @@ import numpy as np
 
 from .statistics import FArray
 
+__all__ = [
+    "BootstrapResult",
+    "credibility_interval",
+]
+
 
 def credibility_interval(
     estimates: FArray,

@@ -41,6 +41,11 @@ from .statistics import (
     compute_weighted_variance,
 )
 
+__all__ = [
+    "get_statistic_fn",
+    "StatisticFunction",
+]
+
 
 class StatisticFunction(Protocol):
     """

@@ -16,7 +16,7 @@ Key Features
 
 Type Aliases
 ------------
-- `FArray`: Alias for `NDArray[np.floating]`, used for floating-point data and weights.
+- `FArray`: Alias for `FArray`, used for floating-point data and weights.
 - `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
 - `FFArray`, `IFArray`: Tuples of data arrays used in bivariate computations.
 
@@ -47,6 +47,24 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import rankdata
 
+__all__ = [
+    "compute_weighted_aggregate",
+    "compute_weighted_eta_square_dependency",
+    "compute_weighted_mean",
+    "compute_weighted_median",
+    "compute_weighted_pearson_dependency",
+    "compute_weighted_percentile",
+    "compute_weighted_quantile",
+    "compute_weighted_spearman_dependency",
+    "compute_weighted_std",
+    "compute_weighted_sum",
+    "compute_weighted_variance",
+    "FArray",
+    "FFArray",
+    "IArray",
+    "IFArray",
+]
+
 FArray: TypeAlias = NDArray[np.floating]
 IArray: TypeAlias = NDArray[np.integer]
 FFArray: TypeAlias = Tuple[FArray, FArray]
@@ -68,9 +86,9 @@ def compute_weighted_aggregate(
     is multiplied with it.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing the
+        data (FArray): A 1D array of numeric values representing the
             data to be aggregated.
-        weights (NDArray[np.floating]): A 1D array of numeric values representing
+        weights (FArray): A 1D array of numeric values representing
             the weights for the data.
         factor (float, optional): A scalar factor to multiply with the computed
             aggregate (default is None).
@@ -123,9 +141,9 @@ def compute_weighted_mean(
     and `weights` via the `compute_weighted_aggregate` function.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the data to be averaged.
-        weights (NDArray[np.floating]): A 1D array of numeric values representing
+        weights (FArray): A 1D array of numeric values representing
             the weights for the data.
 
     Returns:
@@ -156,9 +174,9 @@ def compute_weighted_sum(
     `factor=len(data)`.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the data to be summed.
-        weights (NDArray[np.floating]): A 1D array of numeric values representing
+        weights (FArray): A 1D array of numeric values representing
             the weights for the data.
 
     Returns:
@@ -193,9 +211,9 @@ def compute_weighted_variance(
     delta degrees of freedom.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the data for which we want the variance.
-        weights (NDArray[np.floating]): A 1D array of numeric values representing
+        weights (FArray): A 1D array of numeric values representing
             the weights for the data.
         weighted_mean (float, optional): The weighted mean of the data (default is
             None). If missing, this value is computed via `compute_weighted_mean`.
@@ -241,9 +259,9 @@ def compute_weighted_std(
     `compute_weighted_variance` function.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the data for which we want the standard deviation.
-        weights (NDArray[np.floating]): A 1D array of numeric values representing
+        weights (FArray): A 1D array of numeric values representing
             the weights for the data.
         weighted_mean (float, optional): The weighted mean of the data (default is
             None). If missing, this value is computed via `compute_weighted_mean`
@@ -292,9 +310,9 @@ def compute_weighted_quantile(
     optionally provided to avoid recomputing it internally.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the sample data.
-        weights (NDArray[np.floating]): A 1D array of numeric weights corresponding
+        weights (FArray): A 1D array of numeric weights corresponding
             to the data.
         quantile (float): The desired quantile in the interval [0, 1].
         sorter (Optional[NDArray[np.integer]]): Optional array of indices that
@@ -362,9 +380,9 @@ def compute_weighted_percentile(
     `quantile=0.01 * percentile`.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the sample data.
-        weights (NDArray[np.floating]): A 1D array of numeric weights corresponding
+        weights (FArray): A 1D array of numeric weights corresponding
             to the data.
         percentile (float): The desired percentile in the interval [0, 100].
         sorter (Optional[NDArray[np.integer]]): Optional array of indices that
@@ -404,9 +422,9 @@ def compute_weighted_median(
     `quantile=0.5`.
 
     Args:
-        data (NDArray[np.floating]): A 1D array of numeric values representing
+        data (FArray): A 1D array of numeric values representing
             the sample data.
-        weights (NDArray[np.floating]): A 1D array of numeric weights corresponding
+        weights (FArray): A 1D array of numeric weights corresponding
             to the data.
         sorter (Optional[NDArray[np.integer]]): Optional array of indices that
             sorts `data`.
@@ -450,9 +468,9 @@ def compute_weighted_pearson_dependency(
     product of these normalized arrays.
 
     Args:
-        data (NDArray[np.floating]): A tuple of two 1D float arrays `(data_1, data_2)`
+        data (FArray): A tuple of two 1D float arrays `(data_1, data_2)`
             of equal length.
-        weights (NDArray[np.floating]): A 1D float array of weights, same length as
+        weights (FArray): A 1D float array of weights, same length as
             each array in `data`.
         ddof (int, optional): Delta degrees of freedom for standard deviation.
             Defaults to 0 (population formula). Use 1 for sample-based correction.
@@ -512,9 +530,9 @@ def compute_weighted_spearman_dependency(
     It is particularly useful for assessing non-linear relationships.
 
     Args:
-        data (NDArray[np.floating]): A tuple of two 1D float arrays `(data_1, data_2)`
+        data (FArray): A tuple of two 1D float arrays `(data_1, data_2)`
             of equal length.
-        weights (NDArray[np.floating]): A 1D float array of weights, same length as
+        weights (FArray): A 1D float array of weights, same length as
             each array in `data`.
         ddof (int, optional): Delta degrees of freedom for standard deviation.
             Defaults to 0 (population formula). Use 1 for sample-based correction.
@@ -565,11 +583,10 @@ def compute_weighted_eta_square_dependency(
     analyses and effect size estimation. The value is bounded between 0 and 1.
 
     Args:
-        data (Tuple[NDArray[np.integer], NDArray[np.floating]]): A tuple
-            `(data_cat, data_num)` where:
-                - `data_cat` is a 1D array of integer-encoded categorical values.
-                - `data_num` is a 1D array of corresponding numeric values.
-        weights (NDArray[np.floating]): A 1D array of non-negative weights,
+        data (IFArray): A tuple `(data_cat, data_num)` where:
+            - `data_cat` is a 1D array of integer-encoded categorical values.
+            - `data_num` is a 1D array of corresponding numeric values.
+        weights (FArray): A 1D array of non-negative weights,
             same length as `data_cat`.
 
     Returns:

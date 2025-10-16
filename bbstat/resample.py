@@ -39,6 +39,8 @@ import numpy as np
 
 from .statistics import FArray
 
+__all__ = ["resample"]
+
 
 def resample(
     n_boot: int,
