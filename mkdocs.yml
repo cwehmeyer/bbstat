@@ -1,5 +1,5 @@
 site_name: bbstat
-# site_url: https://yourproject.org
+site_url: https://cwehmeyer.github.io/bbstat/
 repo_url: https://github.com/cwehmeyer/bbstat
 repo_name: cwehmeyer/bbstat
 theme:
@@ -19,6 +19,4 @@ plugins:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
-  - Usage: usage.md
   - API Reference: reference.md
