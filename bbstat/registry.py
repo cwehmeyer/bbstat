@@ -15,6 +15,7 @@ from typing import (
     Dict,
     Optional,
     Protocol,
+    Tuple,
     cast,
     overload,
 )
@@ -223,3 +224,13 @@ def get_statistic_fn(name: str) -> StatisticFunction:
         raise ValueError(
             f"Invalid {name=:}: choose from {list(STATISTIC_FUNCTIONS.keys())}"
         )
+
+
+def get_statistic_fn_names() -> Tuple[str, ...]:
+    """
+    Retrieve the names of registered statistic functions.
+
+    Returns:
+        Tuple[str, ...]: The names of the available statistic functions.
+    """
+    return tuple(STATISTIC_FUNCTIONS.keys())
