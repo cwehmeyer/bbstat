@@ -106,8 +106,29 @@ def test_credibility_interval_fail_on_coverage(
         )
 
 
-def test_bootstrap_result_repr() -> None:
+def test_bootstrap_result_str() -> None:
     bootstrap_result = BootstrapResult(estimates=np.array([1, 1, 1]), coverage=0.87)
     actual = str(bootstrap_result)
     expected = "BootstrapResult(mean=1.0, ci=(1.0, 1.0), coverage=0.87, n_boot=3)"
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "ci, expected",
+    [
+        pytest.param((0.0, 0.0), 0),
+        pytest.param((1.0, 1.0), 0),
+        pytest.param((0.0, 1.0), 1),
+        pytest.param((0.0, 9.9), 1),
+        pytest.param((0.0, 0.1), 2),
+        pytest.param((0.0, 0.999), 2),
+        pytest.param((0.0, 0.01), 3),
+        pytest.param((0.0, 0.0999), 3),
+        pytest.param((0.0, 10.0), 0),
+        pytest.param((0.0, 99.9), 0),
+        pytest.param((0.0, 100.0), -1),
+    ],
+)
+def test_bootstrap_result_ndigits(ci: Tuple[float, float], expected: int) -> None:
+    actual = BootstrapResult.ndigits(ci=ci)
     assert actual == expected

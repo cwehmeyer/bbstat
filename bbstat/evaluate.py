@@ -137,6 +137,29 @@ class BootstrapResult:
         )
         self.n_boot = len(self.estimates)
 
+    @staticmethod
+    def ndigits(ci: Tuple[float, float]) -> int:
+        """
+        Returns number of digits for rounding.
+
+        This method computes the number of digits for rounding mean and credibility
+        interval values for better readability. If the credibility interval has width
+        zero, we round to zero digits. Otherwise, we take one minus the floored order
+        of magnitude of the width.
+
+        Args:
+            ci (Tuple[float, float]): The lower and upper bounds of the credibility
+                interval.
+
+        Returns:
+            int: The number of digits for readable rounding.
+        """
+        lo, hi = ci
+        width = hi - lo
+        if width == 0:
+            return 0
+        return int(1 - math.floor(math.log10(abs(width))))
+
     def __str__(self) -> str:
         """
         Returns a human-readable string representation of the bootstrap result.
@@ -147,8 +170,7 @@ class BootstrapResult:
         Returns:
             str: A formatted string representing the bootstrap result.
         """
-        width = self.ci[1] - self.ci[0]
-        ndigits = 0 if width == 0 else int(2 - math.floor(math.log10(abs(width))) - 1)
+        ndigits = self.ndigits(self.ci)
         mean = round(number=self.mean, ndigits=ndigits)
         lo = round(number=self.ci[0], ndigits=ndigits)
         hi = round(number=self.ci[1], ndigits=ndigits)
