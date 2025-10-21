@@ -573,7 +573,7 @@ def compute_weighted_self_information(
         ```python
         data = np.array([1, 0, 0])
         weights = np.array([0.4, 0.2, 0.4])
-        print(compute_weighted_self_information(data, weights, state=0))  # => ...
+        print(compute_weighted_self_information(data, weights, state=0))  # => 0.510...
         ```
     """
     probability = compute_weighted_probability(data=data, weights=weights, state=state)
@@ -610,7 +610,7 @@ def compute_weighted_log_odds(
         ```python
         data = np.array([1, 0, 0])
         weights = np.array([0.4, 0.2, 0.4])
-        print(compute_weighted_log_odds(data, weights, state=0))  # => ...
+        print(compute_weighted_log_odds(data, weights, state=0))  # => 0.405...
         ```
     """
     probability = compute_weighted_probability(data=data, weights=weights, state=state)
