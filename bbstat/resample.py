@@ -90,7 +90,7 @@ def resample(
     if blocksize is None:
         blocksize = n_boot
     else:
-        blocksize = min(blocksize, n_boot)
+        blocksize = min(max(1, blocksize), n_boot)
     remainder = n_boot
     while remainder > 0:
         size = min(blocksize, remainder)

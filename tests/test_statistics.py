@@ -283,6 +283,28 @@ def test_compute_weighted_quantile_overflow(
 
 
 @pytest.mark.parametrize(
+    "data, weights",
+    [
+        pytest.param(np.array(1), np.array([0.5, 0.5])),
+        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
+        pytest.param(np.array([0.5, 0.5]), np.array(1)),
+        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
+        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
+    ],
+)
+def test_compute_weighted_quantile_fail(
+    data: FArray,
+    weights: FArray,
+) -> None:
+    with pytest.raises(ValueError):
+        _ = compute_weighted_quantile(
+            data=data,
+            weights=weights,
+            quantile=0.5,
+        )
+
+
+@pytest.mark.parametrize(
     "percentile",
     [
         pytest.param(0.2),

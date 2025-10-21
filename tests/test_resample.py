@@ -55,3 +55,15 @@ def test_resample(
         assert (0 <= sample).all()
         assert (sample <= 1).all()
         np.testing.assert_allclose(np.sum(sample), 1.0)
+
+
+@pytest.mark.parametrize(
+    "n_boot, n_data",
+    [
+        pytest.param(1, 0),
+        pytest.param(0, 1),
+    ],
+)
+def test_resample_fail(n_boot: int, n_data: int) -> None:
+    with pytest.raises(ValueError):
+        _ = list(resample(n_boot=n_boot, n_data=n_data))
