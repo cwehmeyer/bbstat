@@ -26,6 +26,7 @@ from .statistics import (
     IArray,
     IFArray,
     compute_weighted_aggregate,
+    compute_weighted_entropy,
     compute_weighted_eta_square_dependency,
     compute_weighted_mean,
     compute_weighted_median,
@@ -53,16 +54,17 @@ class StatisticFunction(Protocol):
 
     Overloads:
 
-    - `aggregate`: accepts optional `factor`
-    - `mean`, `sum`: accept only `data`, `weights`
-    - `variance`, `std`: accept optional `weighted_mean` and `ddof`
-    - `quantile`: requires `quantile` and optional `sorter`
-    - `percentile`: requires `percentile` and optional `sorter`
+    - `aggregate`: accepts `data: FArray`, `weights: FArray`, and optional `factor: float`
+    - `mean`, `sum`: accept only `data: FArray`, `weights: FArray`
+    - `variance`, `std`: accept optional `weighted_mean: float` and `ddof: int`
+    - `quantile`: requires `quantile: float` and optional `sorter: IArray`
+    - `percentile`: requires `percentile: float` and optional `sorter: IArray`
     - `median`: accepts optional `sorter`
     - `pearson_dependency`, `spearman_dependency`: take tuple of two
       float arrays (`FFArray`) and `ddof`
     - `eta_square_dependency`: takes tuple of and integer and a float
       array (`IFArray`)
+    - `entropy`: accepts `data: IFArray` and `weights: FArray`
     """
 
     # aggregate
@@ -80,6 +82,14 @@ class StatisticFunction(Protocol):
     def __call__(
         self,
         data: FArray,
+        weights: FArray,
+    ) -> float: ...
+
+    # entropy
+    @overload
+    def __call__(
+        self,
+        data: IArray,
         weights: FArray,
     ) -> float: ...
 
@@ -178,6 +188,10 @@ STATISTIC_FUNCTIONS: Dict[str, StatisticFunction] = {
         StatisticFunction,
         compute_weighted_median,
     ),
+    "entropy": cast(
+        StatisticFunction,
+        compute_weighted_entropy,
+    ),
     "pearson_dependency": cast(
         StatisticFunction,
         compute_weighted_pearson_dependency,
@@ -208,6 +222,7 @@ def get_statistic_fn(name: str) -> StatisticFunction:
             - "quantile"
             - "percentile"
             - "median"
+            - "entropy"
             - "pearson_dependency"
             - "spearman_dependency"
             - "eta_square_dependency"

@@ -66,6 +66,7 @@ This section documents the public API of the `bbstat` package.
         - FFArray
         - IFArray
         - compute_weighted_aggregate
+        - compute_weighted_entropy
         - compute_weighted_eta_square_dependency
         - compute_weighted_mean
         - compute_weighted_median

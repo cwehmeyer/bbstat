@@ -40,6 +40,7 @@ from scipy.stats import rankdata
 
 __all__ = [
     "compute_weighted_aggregate",
+    "compute_weighted_entropy",
     "compute_weighted_eta_square_dependency",
     "compute_weighted_mean",
     "compute_weighted_median",
@@ -444,6 +445,51 @@ def compute_weighted_median(
         quantile=0.5,
         sorter=sorter,
     )
+
+
+def compute_weighted_entropy(
+    data: IArray,
+    weights: FArray,
+) -> float:
+    """
+    Computes a weighted entropy of 1D code data.
+
+    This function calculates the weighted entropy by first computing
+    the weighted distribution (via weighted bincount), dropping the zero
+    elements (contribute zero to the following sum), and computing the
+    negative dot product between the distribution and log-distribution.
+
+    Args:
+        data (IArray): A 1D array of numeric values representing
+            the sample data in code format.
+        weights (FArray): A 1D array of numeric weights corresponding
+            to the data.
+
+    Returns:
+        float: The weighted entropy value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D.
+
+    Example:
+        ```python
+        data = np.array([1, 0, 0])
+        weights = np.array([0.4, 0.2, 0.4])
+        print(compute_weighted_entropy(data, weights))  # => 0.673...
+        ```
+    """
+    if data.ndim != 1:
+        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
+    if weights.ndim != 1:
+        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
+    if weights.shape != data.shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
+            "must be equal."
+        )
+    distribution = np.bincount(data, weights=weights)
+    distribution = distribution[distribution > 0.0]
+    return -np.dot(distribution, np.log(distribution)).item()
 
 
 def compute_weighted_pearson_dependency(
