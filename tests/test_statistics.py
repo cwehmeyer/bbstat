@@ -12,6 +12,7 @@ from bbstat.statistics import (
     compute_weighted_median,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
+    compute_weighted_probability,
     compute_weighted_quantile,
     compute_weighted_std,
     compute_weighted_sum,
@@ -313,18 +314,99 @@ def test_compute_weighted_percentile(
 
 
 def test_compute_weighted_entropy_0(
-    data_random_code: IArray, weights_constant: FArray,
+    data_random_code: IArray,
+    weights_constant: FArray,
 ) -> None:
     actual = compute_weighted_entropy(data=data_random_code, weights=weights_constant)
     distribution = np.bincount(data_random_code) / len(data_random_code)
     distribution = distribution[distribution > 0]
     expected = -np.sum(distribution * np.log(distribution))
     np.testing.assert_allclose(actual, expected)
-    expected
 
 
 def test_compute_weighted_entropy_1(
-    data_constant_code: IArray, weights_random: FArray,
+    data_constant_code: IArray,
+    weights_random: FArray,
 ) -> None:
     actual = compute_weighted_entropy(data=data_constant_code, weights=weights_random)
     np.testing.assert_allclose(actual, 0.0, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    "data, weights",
+    [
+        pytest.param(np.array(1), np.array([0.5, 0.5])),
+        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
+        pytest.param(np.array([0.5, 0.5]), np.array(1)),
+        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
+        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
+    ],
+)
+def test_compute_weighted_entropy_fail(
+    data: IArray,
+    weights: FArray,
+) -> None:
+    with pytest.raises(ValueError):
+        _ = compute_weighted_entropy(
+            data=data,
+            weights=weights,
+        )
+
+
+
+@pytest.mark.parametrize(
+    "state",
+    [
+        pytest.param(0),
+        pytest.param(1),
+    ],
+)
+def test_compute_weighted_probability_0(
+    data_random_code: IArray,
+    weights_constant: FArray,
+    state: int,
+) -> None:
+    actual = compute_weighted_probability(
+        data=data_random_code,
+        weights=weights_constant,
+        state=state,
+    )
+    expected = np.mean(data_random_code == state)
+    np.testing.assert_allclose(actual, expected)
+
+
+def test_compute_weighted_probability_1(
+    data_constant_code: IArray,
+    weights_random: FArray,
+) -> None:
+    actual = compute_weighted_probability(
+        data=data_constant_code,
+        weights=weights_random,
+        state=0,
+    )
+    np.testing.assert_allclose(actual, 1.0, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    "data, weights, state",
+    [
+        pytest.param(np.array(0), np.array([0.5, 0.5]), 0),
+        pytest.param(np.array([[0]]), np.array([0.5, 0.5]), 0),
+        pytest.param(np.array([0, 1]), np.array(1), 0),
+        pytest.param(np.array([0, 1]), np.array([[1]]), 0),
+        pytest.param(np.array([0, 1]), np.array([0.5]), 0),
+        pytest.param(np.array([0, 1]), np.array([0.5, 0.5]), -1),
+        pytest.param(np.array([0, 1]), np.array([0.5, 0.5]), 2),
+    ],
+)
+def test_compute_weighted_probability_fail(
+    data: IArray,
+    weights: FArray,
+    state: int,
+) -> None:
+    with pytest.raises(ValueError):
+        _ = compute_weighted_probability(
+            data=data,
+            weights=weights,
+            state=state,
+        )

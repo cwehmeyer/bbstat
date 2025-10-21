@@ -21,6 +21,8 @@ Built-in Functions:
     - `"compute_weighted_std"`: Weighted standard deviation.
     - `"compute_weighted_quantile"` / `"compute_weighted_percentile"`: Weighted quantile estimation.
     - `"compute_weighted_median"`: Weighted median.
+    - `"compute_weighted_entropy"`: Weighted entropy.
+    - `"compute_weighted_probability"`: Weighted probability of a state.
     - `"compute_weighted_pearson_dependency"`: Weighted Pearson correlation for two variables.
     - `"compute_weighted_spearman_dependency"`: Weighted Spearman correlation.
     - `"compute_weighted_eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
@@ -46,6 +48,7 @@ __all__ = [
     "compute_weighted_median",
     "compute_weighted_pearson_dependency",
     "compute_weighted_percentile",
+    "compute_weighted_probability",
     "compute_weighted_quantile",
     "compute_weighted_spearman_dependency",
     "compute_weighted_std",
@@ -490,6 +493,53 @@ def compute_weighted_entropy(
     distribution = np.bincount(data, weights=weights)
     distribution = distribution[distribution > 0.0]
     return -np.dot(distribution, np.log(distribution)).item()
+
+
+def compute_weighted_probability(
+    data: IArray,
+    weights: FArray,
+    *,
+    state: int = 0,
+) -> float:
+    """
+    Computes a weighted probability of a state within 1D code data.
+
+    This function calculates the weighted probability of a `state` by summing
+    the `weights` which coincide with `data == state`.
+
+    Args:
+        data (IArray): A 1D array of numeric values representing
+            the sample data in code format.
+        weights (FArray): A 1D array of numeric weights corresponding
+            to the data.
+        state (int): The state for which we estimate the probability.
+
+    Returns:
+        float: The weighted probability value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D,
+            or if `state` is not in `data`.
+
+    Example:
+        ```python
+        data = np.array([1, 0, 0])
+        weights = np.array([0.4, 0.2, 0.4])
+        print(compute_weighted_probability(data, weights, state=0))  # => 0.6
+        ```
+    """
+    if data.ndim != 1:
+        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
+    if weights.ndim != 1:
+        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
+    if weights.shape != data.shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
+            "must be equal."
+        )
+    if state not in data:
+        raise ValueError(f"Incompatible parameter {state=:}: not included in data.")
+    return np.sum(weights[data == state])
 
 
 def compute_weighted_pearson_dependency(

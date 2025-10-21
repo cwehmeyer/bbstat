@@ -72,6 +72,7 @@ This section documents the public API of the `bbstat` package.
         - compute_weighted_median
         - compute_weighted_pearson_dependency
         - compute_weighted_percentile
+        - compute_weighted_probability
         - compute_weighted_quantile
         - compute_weighted_spearman_dependency
         - compute_weighted_std

@@ -32,6 +32,7 @@ from .statistics import (
     compute_weighted_median,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
+    compute_weighted_probability,
     compute_weighted_quantile,
     compute_weighted_spearman_dependency,
     compute_weighted_std,
@@ -65,6 +66,7 @@ class StatisticFunction(Protocol):
     - `eta_square_dependency`: takes tuple of and integer and a float
       array (`IFArray`)
     - `entropy`: accepts `data: IFArray` and `weights: FArray`
+    - `probability`: accepts `data: IFArray`, `weights: FArray`, and `state: int`
     """
 
     # aggregate
@@ -91,6 +93,16 @@ class StatisticFunction(Protocol):
         self,
         data: IArray,
         weights: FArray,
+    ) -> float: ...
+
+    # probability
+    @overload
+    def __call__(
+        self,
+        data: IArray,
+        weights: FArray,
+        *,
+        state: int,
     ) -> float: ...
 
     # variance, std
@@ -191,6 +203,10 @@ STATISTIC_FUNCTIONS: Dict[str, StatisticFunction] = {
     "entropy": cast(
         StatisticFunction,
         compute_weighted_entropy,
+    ),
+    "probability": cast(
+        StatisticFunction,
+        compute_weighted_probability,
     ),
     "pearson_dependency": cast(
         StatisticFunction,
