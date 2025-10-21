@@ -29,12 +29,12 @@ Example:
 See the function-level docstring of `bootstrap` for full details.
 """
 
-from typing import Any, Dict, Optional, Union, Callable
+from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 
-from .registry import get_statistic_fn
 from .evaluate import BootstrapResult
+from .registry import get_statistic_fn
 from .resample import resample
 
 __all__ = ["bootstrap"]

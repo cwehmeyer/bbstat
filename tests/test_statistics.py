@@ -1,19 +1,22 @@
+import math
 from typing import Optional
 
 import numpy as np
 import pytest
 
 from bbstat.statistics import (
-    IArray,
     FArray,
+    IArray,
     compute_weighted_aggregate,
     compute_weighted_entropy,
+    compute_weighted_log_odds,
     compute_weighted_mean,
     compute_weighted_median,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
     compute_weighted_probability,
     compute_weighted_quantile,
+    compute_weighted_self_information,
     compute_weighted_std,
     compute_weighted_sum,
     compute_weighted_variance,
@@ -375,7 +378,6 @@ def test_compute_weighted_entropy_fail(
         )
 
 
-
 @pytest.mark.parametrize(
     "state",
     [
@@ -432,3 +434,58 @@ def test_compute_weighted_probability_fail(
             weights=weights,
             state=state,
         )
+
+
+@pytest.mark.parametrize(
+    "state",
+    [
+        pytest.param(0),
+        pytest.param(1),
+    ],
+)
+def test_compute_weighted_self_information_0(
+    data_random_code: IArray,
+    weights_constant: FArray,
+    state: int,
+) -> None:
+    actual = compute_weighted_self_information(
+        data=data_random_code,
+        weights=weights_constant,
+        state=state,
+    )
+    expected = -math.log(np.mean(data_random_code == state))
+    np.testing.assert_allclose(actual, expected)
+
+
+def test_compute_weighted_self_information_1(
+    data_constant_code: IArray,
+    weights_random: FArray,
+) -> None:
+    actual = compute_weighted_self_information(
+        data=data_constant_code,
+        weights=weights_random,
+        state=0,
+    )
+    np.testing.assert_allclose(actual, 0.0, atol=1e-15)
+
+
+@pytest.mark.parametrize(
+    "state",
+    [
+        pytest.param(0),
+        pytest.param(1),
+    ],
+)
+def test_compute_weighted_log_odds(
+    data_random_code: IArray,
+    weights_constant: FArray,
+    state: int,
+) -> None:
+    actual = compute_weighted_log_odds(
+        data=data_random_code,
+        weights=weights_constant,
+        state=state,
+    )
+    probability = np.mean(data_random_code == state)
+    expected = math.log(probability / (1 - probability))
+    np.testing.assert_allclose(actual, expected)

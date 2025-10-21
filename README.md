@@ -59,16 +59,20 @@ Returns a `BootstrapResult` with:
 ### Weighted statistic functions included
 
 The module bbstat.statistics provides a number univariate and bivariate weighted statistics:
-- `"sum"`: `bbstat.statistics.compute_weighted_sum(data, weights)`
-- `"mean"`: `bbstat.statistics.compute_weighted_mean(data, weights)`
-- `"variance"`: `bbstat.statistics.compute_weighted_variance(data, weights, ddof: int = 0)`
-- `"std"`: `bbstat.statistics.compute_weighted_std(data, weights, ddof: int = 0)`
-- `"median"`: `bbstat.statistics.compute_weighted_median(data, weights)`
-- `"quantile"`: `bbstat.statistics.compute_weighted_quantile(data, weights, quantile: float)`
-- `"percentile"`: `bbstat.statistics.compute_weighted_percentile(data, weights, percentile: float)`
-- `"pearson_dependence"`: `bbstat.statistics.compute_weighted_pearson_dependence(data, weights, ddof: int = 0)`
-- `"spearman_depedence"`: `bbstat.statistics.compute_weighted_spearman_depedence(data, weights, ddof: int = 0)`
+- `"entropy"`: `bbstat.statistics.compute_weighted_entropy(data, weights)`
 - `"eta_square_dependency"`: `bbstat.statistics.compute_weighted_eta_square_dependency(data, weights)`
+- `"log_odds"`: `bbstat.statistics.compute_weighted_log_odds(data, weights, state: int)`
+- `"mean"`: `bbstat.statistics.compute_weighted_mean(data, weights)`
+- `"median"`: `bbstat.statistics.compute_weighted_median(data, weights)`
+- `"pearson_dependence"`: `bbstat.statistics.compute_weighted_pearson_dependence(data, weights, ddof: int = 0)`
+- `"percentile"`: `bbstat.statistics.compute_weighted_percentile(data, weights, percentile: float)`
+- `"probability"`: `bbstat.statistics.compute_weighted_probability(data, weights, state: int)`
+- `"quantile"`: `bbstat.statistics.compute_weighted_quantile(data, weights, quantile: float)`
+- `"self_information"`: `bbstat.statistics.compute_weighted_self_information(data, weights, state: int)`
+- `"spearman_depedence"`: `bbstat.statistics.compute_weighted_spearman_depedence(data, weights, ddof: int = 0)`
+- `"std"`: `bbstat.statistics.compute_weighted_std(data, weights, ddof: int = 0)`
+- `"sum"`: `bbstat.statistics.compute_weighted_sum(data, weights)`
+- `"variance"`: `bbstat.statistics.compute_weighted_variance(data, weights, ddof: int = 0)`
 
 If you want to use your own custom functions, please adhere to this pattern
 
@@ -80,7 +84,7 @@ where `data` is
 - a 1D numpy array of length `n_data` or
 - a tuple/list of 1D numpy arrays, each of length `n_data`
 
-and `weights` is a 1D numpy array of length `n_data`. The function may also take additional parameters which can be supplied via
+and `weights` is a 1D numpy array of length `n_data`, with non-negative elements that sum up to one. The function may also take additional parameters which can be supplied via `**kwargs`.
 
 ## License
 

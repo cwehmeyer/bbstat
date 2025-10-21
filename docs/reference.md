@@ -62,18 +62,20 @@ This section documents the public API of the `bbstat` package.
       show_source: true
       members:
         - FArray
-        - IArray
         - FFArray
+        - IArray
         - IFArray
         - compute_weighted_aggregate
         - compute_weighted_entropy
         - compute_weighted_eta_square_dependency
+        - compute_weighted_log_odds
         - compute_weighted_mean
         - compute_weighted_median
         - compute_weighted_pearson_dependency
         - compute_weighted_percentile
         - compute_weighted_probability
         - compute_weighted_quantile
+        - compute_weighted_self_information
         - compute_weighted_spearman_dependency
         - compute_weighted_std
         - compute_weighted_sum

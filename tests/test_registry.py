@@ -3,12 +3,16 @@ import pytest
 from bbstat.registry import StatisticFunction, get_statistic_fn, get_statistic_fn_names
 from bbstat.statistics import (
     compute_weighted_aggregate,
+    compute_weighted_entropy,
     compute_weighted_eta_square_dependency,
+    compute_weighted_log_odds,
     compute_weighted_mean,
     compute_weighted_median,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
+    compute_weighted_probability,
     compute_weighted_quantile,
+    compute_weighted_self_information,
     compute_weighted_spearman_dependency,
     compute_weighted_std,
     compute_weighted_sum,
@@ -20,12 +24,16 @@ from bbstat.statistics import (
     "name, statistic_fn",
     [
         pytest.param("aggregate", compute_weighted_aggregate),
+        pytest.param("entropy", compute_weighted_entropy),
         pytest.param("eta_square_dependency", compute_weighted_eta_square_dependency),
+        pytest.param("log_odds", compute_weighted_log_odds),
         pytest.param("mean", compute_weighted_mean),
         pytest.param("median", compute_weighted_median),
         pytest.param("pearson_dependency", compute_weighted_pearson_dependency),
         pytest.param("percentile", compute_weighted_percentile),
+        pytest.param("probability", compute_weighted_probability),
         pytest.param("quantile", compute_weighted_quantile),
+        pytest.param("self_information", compute_weighted_self_information),
         pytest.param("spearman_dependency", compute_weighted_spearman_dependency),
         pytest.param("std", compute_weighted_std),
         pytest.param("sum", compute_weighted_sum),
@@ -40,6 +48,7 @@ def test_get_statistic_fn(name: str, statistic_fn: StatisticFunction) -> None:
 def test_get_statistic_fn_fail() -> None:
     with pytest.raises(ValueError):
         _ = get_statistic_fn("unknown")
+
 
 def test_get_statistic_fn_names() -> None:
     statistic_fn_names = get_statistic_fn_names()

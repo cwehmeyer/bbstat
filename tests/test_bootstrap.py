@@ -5,7 +5,7 @@ import pytest
 
 from bbstat.bootstrap import bootstrap
 from bbstat.evaluate import BootstrapResult
-from bbstat.statistics import compute_weighted_aggregate, FArray
+from bbstat.statistics import FArray, compute_weighted_aggregate
 
 
 @pytest.fixture(scope="module")

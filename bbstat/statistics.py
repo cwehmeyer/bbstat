@@ -41,23 +41,25 @@ from numpy.typing import NDArray
 from scipy.stats import rankdata
 
 __all__ = [
+    "FArray",
+    "FFArray",
+    "IArray",
+    "IFArray",
     "compute_weighted_aggregate",
     "compute_weighted_entropy",
     "compute_weighted_eta_square_dependency",
+    "compute_weighted_log_odds",
     "compute_weighted_mean",
     "compute_weighted_median",
     "compute_weighted_pearson_dependency",
     "compute_weighted_percentile",
     "compute_weighted_probability",
     "compute_weighted_quantile",
+    "compute_weighted_self_information",
     "compute_weighted_spearman_dependency",
     "compute_weighted_std",
     "compute_weighted_sum",
     "compute_weighted_variance",
-    "FArray",
-    "FFArray",
-    "IArray",
-    "IFArray",
 ]
 
 FArray: TypeAlias = NDArray[np.floating]
@@ -498,8 +500,7 @@ def compute_weighted_entropy(
 def compute_weighted_probability(
     data: IArray,
     weights: FArray,
-    *,
-    state: int = 0,
+    state: int,
 ) -> float:
     """
     Computes a weighted probability of a state within 1D code data.
@@ -539,7 +540,81 @@ def compute_weighted_probability(
         )
     if state not in data:
         raise ValueError(f"Incompatible parameter {state=:}: not included in data.")
-    return np.sum(weights[data == state])
+    return np.sum(weights[data == state]).item()
+
+
+def compute_weighted_self_information(
+    data: IArray,
+    weights: FArray,
+    state: int,
+) -> float:
+    """
+    Computes a weighted self-information of a state within 1D code data.
+
+    This function calculates the weighted probability of a `state` by summing
+    the `weights` which coincide with `data == state`. The self-information then
+    computes as negative logarithm of the weighted probability.
+
+    Args:
+        data (IArray): A 1D array of numeric values representing
+            the sample data in code format.
+        weights (FArray): A 1D array of numeric weights corresponding
+            to the data.
+        state (int): The state for which we estimate the self-information.
+
+    Returns:
+        float: The weighted self-information value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D,
+            or if `state` is not in `data`.
+
+    Example:
+        ```python
+        data = np.array([1, 0, 0])
+        weights = np.array([0.4, 0.2, 0.4])
+        print(compute_weighted_self_information(data, weights, state=0))  # => ...
+        ```
+    """
+    probability = compute_weighted_probability(data=data, weights=weights, state=state)
+    return -math.log(probability)
+
+
+def compute_weighted_log_odds(
+    data: IArray,
+    weights: FArray,
+    state: int,
+) -> float:
+    """
+    Computes a weighted log-odds of a state within 1D code data.
+
+    This function calculates the weighted probability of a `state`, `p(state)` by summing
+    the `weights` which coincide with `data == state`. The log-odds then
+    computes as logarithm of the odds `p(state) / (1 - p(state))`.
+
+    Args:
+        data (IArray): A 1D array of numeric values representing
+            the sample data in code format.
+        weights (FArray): A 1D array of numeric weights corresponding
+            to the data.
+        state (int): The state for which we estimate the log-odds.
+
+    Returns:
+        float: The weighted log-odds value.
+
+    Raises:
+        ValueError: If `data` and `weights` have different shapes or are not 1D,
+            or if `state` is not in `data`.
+
+    Example:
+        ```python
+        data = np.array([1, 0, 0])
+        weights = np.array([0.4, 0.2, 0.4])
+        print(compute_weighted_log_odds(data, weights, state=0))  # => ...
+        ```
+    """
+    probability = compute_weighted_probability(data=data, weights=weights, state=state)
+    return math.log(probability / (1.0 - probability))
 
 
 def compute_weighted_pearson_dependency(

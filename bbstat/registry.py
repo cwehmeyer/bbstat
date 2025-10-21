@@ -28,12 +28,14 @@ from .statistics import (
     compute_weighted_aggregate,
     compute_weighted_entropy,
     compute_weighted_eta_square_dependency,
+    compute_weighted_log_odds,
     compute_weighted_mean,
     compute_weighted_median,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
     compute_weighted_probability,
     compute_weighted_quantile,
+    compute_weighted_self_information,
     compute_weighted_spearman_dependency,
     compute_weighted_std,
     compute_weighted_sum,
@@ -66,7 +68,8 @@ class StatisticFunction(Protocol):
     - `eta_square_dependency`: takes tuple of and integer and a float
       array (`IFArray`)
     - `entropy`: accepts `data: IFArray` and `weights: FArray`
-    - `probability`: accepts `data: IFArray`, `weights: FArray`, and `state: int`
+    - `probability`, `self_information`, `log_odds`: accepts `data: IFArray`,
+      `weights: FArray`, and `state: int`
     """
 
     # aggregate
@@ -95,13 +98,12 @@ class StatisticFunction(Protocol):
         weights: FArray,
     ) -> float: ...
 
-    # probability
+    # probability, log_odds, self_information
     @overload
     def __call__(
         self,
         data: IArray,
         weights: FArray,
-        *,
         state: int,
     ) -> float: ...
 
@@ -208,6 +210,14 @@ STATISTIC_FUNCTIONS: Dict[str, StatisticFunction] = {
         StatisticFunction,
         compute_weighted_probability,
     ),
+    "self_information": cast(
+        StatisticFunction,
+        compute_weighted_self_information,
+    ),
+    "log_odds": cast(
+        StatisticFunction,
+        compute_weighted_log_odds,
+    ),
     "pearson_dependency": cast(
         StatisticFunction,
         compute_weighted_pearson_dependency,
@@ -239,6 +249,9 @@ def get_statistic_fn(name: str) -> StatisticFunction:
             - "percentile"
             - "median"
             - "entropy"
+            - "probability"
+            - "self_information"
+            - "log_odds"
             - "pearson_dependency"
             - "spearman_dependency"
             - "eta_square_dependency"
