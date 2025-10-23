@@ -34,7 +34,7 @@ Notes:
 """
 
 import math
-from typing import Optional, Tuple, TypeAlias, cast
+from typing import Optional, Tuple, TypeAlias, Union, cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -45,6 +45,7 @@ __all__ = [
     "FFArray",
     "IArray",
     "IFArray",
+    "IIArray",
     "compute_weighted_aggregate",
     "compute_weighted_entropy",
     "compute_weighted_eta_square_dependency",
@@ -66,6 +67,7 @@ FArray: TypeAlias = NDArray[np.floating]
 IArray: TypeAlias = NDArray[np.integer]
 FFArray: TypeAlias = Tuple[FArray, FArray]
 IFArray: TypeAlias = Tuple[IArray, FArray]
+IIArray: TypeAlias = Tuple[IArray, IArray]
 
 
 def compute_weighted_aggregate(
@@ -112,15 +114,7 @@ def compute_weighted_aggregate(
         equals the length of the data array, the aggregation computes the weighted sum.
 
     """
-    if data.ndim != 1:
-        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
-    if weights.ndim != 1:
-        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
-    if weights.shape != data.shape:
-        raise ValueError(
-            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
-            "must be equal."
-        )
+    validate_array(data=data, weights=weights)
     aggregate = np.dot(weights, data)
     if factor is not None:
         aggregate *= factor
@@ -158,15 +152,7 @@ def compute_weighted_entropy(
         print(compute_weighted_entropy(data, weights))  # => 0.673...
         ```
     """
-    if data.ndim != 1:
-        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
-    if weights.ndim != 1:
-        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
-    if weights.shape != data.shape:
-        raise ValueError(
-            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
-            "must be equal."
-        )
+    validate_array(data=data, weights=weights)
     distribution = np.bincount(data, weights=weights)
     distribution = distribution[distribution > 0.0]
     return -np.dot(distribution, np.log(distribution)).item()
@@ -488,15 +474,7 @@ def compute_weighted_probability(
         print(compute_weighted_probability(data, weights, state=0))  # => 0.6
         ```
     """
-    if data.ndim != 1:
-        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
-    if weights.ndim != 1:
-        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
-    if weights.shape != data.shape:
-        raise ValueError(
-            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
-            "must be equal."
-        )
+    validate_array(data=data, weights=weights)
     if state not in data:
         raise ValueError(f"Incompatible parameter {state=:}: not included in data.")
     return np.sum(weights[data == state]).item()
@@ -550,17 +528,11 @@ def compute_weighted_quantile(
         - Linear interpolation is used between the two closest surrounding data points.
         - Providing a precomputed `sorter` can optimize performance in repeated calls.
     """
-    if data.ndim != 1:
-        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
-    if weights.ndim != 1:
-        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
-    if weights.shape != data.shape:
-        raise ValueError(
-            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
-            "must be equal."
-        )
+    validate_array(data=data, weights=weights)
     if sorter is None:
         sorter = np.argsort(data)
+    elif sorter.shape != data.shape:
+        raise ValueError(f"Invalid parameter {sorter.shape}: must match {data.shape}.")
     cumulative_weights = np.cumsum(weights[sorter])
     cw_lo, cw_hi = cumulative_weights[[0, -1]]
     cumulative_weights -= cw_lo
@@ -798,3 +770,65 @@ def compute_weighted_variance(
         weights=weights,
         factor=len(data) / (len(data) - ddof),
     )
+
+
+def validate_array(data: Union[FArray, IArray], weights: FArray) -> None:
+    """
+    Validates data and weights parameters.
+
+    This function probes that both data and weights are 1D arrays of the same length.
+
+    Args:
+        data (FArray or IArray): A 1D array of numeric values.
+        weights (FArray): A 1D array of numeric values representing
+            the weights for the data.
+
+    Raises:
+        ValueError: If `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+    """
+    if data.ndim != 1:
+        raise ValueError(f"Invalid parameter {data.ndim=:}: must be 1.")
+    if weights.ndim != 1:
+        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
+    if weights.shape != data.shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data.shape=:}: "
+            "must be equal."
+        )
+
+
+def validate_arrays(data: Union[FFArray, IFArray, IIArray], weights: FArray) -> None:
+    """
+    Validates data and weights parameters.
+
+    This function probes that both data is a tuple of 1D arrays, weights is 1D array,
+    and all arrays are of the same length.
+
+    Args:
+        data (FFArray or IFArray or IIArray): A tuple of two 1D array of numeric values.
+        weights (FArray): A 1D array of numeric values representing
+            the weights for the data.
+
+    Raises:
+        ValueError: If the two elements of `data` or `weights` are not 1D arrays.
+        ValueError: If the shapes of `data` and `weights` do not match.
+    """
+    if len(data) != 2:
+        raise ValueError(f"Invalid parameter {len(data)}: must contain two arrays.")
+    if data[0].ndim != 1:
+        raise ValueError(f"Invalid parameter {data[0].ndim=:}: must be 1.")
+    if data[1].ndim != 1:
+        raise ValueError(f"Invalid parameter {data[1].ndim=:}: must be 1.")
+    if weights.ndim != 1:
+        raise ValueError(f"Invalid parameter {weights.ndim=:}: must be 1.")
+    if weights.shape != data[0].shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data[0].shape=:}: "
+            "must be equal."
+        )
+    if weights.shape != data[1].shape:
+        raise ValueError(
+            f"Incompatible parameters shapes {weights.shape=:} ≠ {data[1].shape=:}: "
+            "must be equal."
+        )

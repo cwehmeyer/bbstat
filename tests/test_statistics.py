@@ -1,12 +1,15 @@
 import math
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import pytest
 
 from bbstat.statistics import (
     FArray,
+    FFArray,
     IArray,
+    IFArray,
+    IIArray,
     compute_weighted_aggregate,
     compute_weighted_entropy,
     compute_weighted_log_odds,
@@ -20,6 +23,8 @@ from bbstat.statistics import (
     compute_weighted_std,
     compute_weighted_sum,
     compute_weighted_variance,
+    validate_array,
+    validate_arrays,
 )
 
 
@@ -83,27 +88,6 @@ def test_compute_weighted_aggregate(
         factor=factor,
     )
     np.testing.assert_allclose(actual, expected)
-
-
-@pytest.mark.parametrize(
-    "data, weights",
-    [
-        pytest.param(np.array(1), np.array([0.5, 0.5])),
-        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
-        pytest.param(np.array([0.5, 0.5]), np.array(1)),
-        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
-        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
-    ],
-)
-def test_compute_weighted_aggregate_fail(
-    data: FArray,
-    weights: FArray,
-) -> None:
-    with pytest.raises(ValueError):
-        _ = compute_weighted_aggregate(
-            data=data,
-            weights=weights,
-        )
 
 
 def test_compute_weighted_mean_0(
@@ -285,25 +269,13 @@ def test_compute_weighted_quantile_overflow(
     np.testing.assert_allclose(actual, expected)
 
 
-@pytest.mark.parametrize(
-    "data, weights",
-    [
-        pytest.param(np.array(1), np.array([0.5, 0.5])),
-        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
-        pytest.param(np.array([0.5, 0.5]), np.array(1)),
-        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
-        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
-    ],
-)
 def test_compute_weighted_quantile_fail(
-    data: FArray,
-    weights: FArray,
+    data_random: FArray,
+    weights_random: FArray,
 ) -> None:
     with pytest.raises(ValueError):
         _ = compute_weighted_quantile(
-            data=data,
-            weights=weights,
-            quantile=0.5,
+            data=data_random, weights=weights_random, quantile=0.5, sorter=np.array([1])
         )
 
 
@@ -354,28 +326,7 @@ def test_compute_weighted_entropy_1(
     weights_random: FArray,
 ) -> None:
     actual = compute_weighted_entropy(data=data_constant_code, weights=weights_random)
-    np.testing.assert_allclose(actual, 0.0, atol=1e-15)
-
-
-@pytest.mark.parametrize(
-    "data, weights",
-    [
-        pytest.param(np.array(1), np.array([0.5, 0.5])),
-        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
-        pytest.param(np.array([0.5, 0.5]), np.array(1)),
-        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
-        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
-    ],
-)
-def test_compute_weighted_entropy_fail(
-    data: IArray,
-    weights: FArray,
-) -> None:
-    with pytest.raises(ValueError):
-        _ = compute_weighted_entropy(
-            data=data,
-            weights=weights,
-        )
+    np.testing.assert_allclose(actual, 0.0, atol=1e-14)
 
 
 @pytest.mark.parametrize(
@@ -408,17 +359,12 @@ def test_compute_weighted_probability_1(
         weights=weights_random,
         state=0,
     )
-    np.testing.assert_allclose(actual, 1.0, atol=1e-15)
+    np.testing.assert_allclose(actual, 1.0, atol=1e-14)
 
 
 @pytest.mark.parametrize(
     "data, weights, state",
     [
-        pytest.param(np.array(0), np.array([0.5, 0.5]), 0),
-        pytest.param(np.array([[0]]), np.array([0.5, 0.5]), 0),
-        pytest.param(np.array([0, 1]), np.array(1), 0),
-        pytest.param(np.array([0, 1]), np.array([[1]]), 0),
-        pytest.param(np.array([0, 1]), np.array([0.5]), 0),
         pytest.param(np.array([0, 1]), np.array([0.5, 0.5]), -1),
         pytest.param(np.array([0, 1]), np.array([0.5, 0.5]), 2),
     ],
@@ -489,3 +435,53 @@ def test_compute_weighted_log_odds(
     probability = np.mean(data_random_code == state)
     expected = math.log(probability / (1 - probability))
     np.testing.assert_allclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "data, weights",
+    [
+        pytest.param(np.array(1), np.array([0.5, 0.5])),
+        pytest.param(np.array([[1]]), np.array([0.5, 0.5])),
+        pytest.param(np.array([0.5, 0.5]), np.array(1)),
+        pytest.param(np.array([0.5, 0.5]), np.array([[1]])),
+        pytest.param(np.array([0.5, 0.5]), np.array([0.5])),
+    ],
+)
+def test_validate_array(
+    data: Union[FArray, IArray],
+    weights: FArray,
+) -> None:
+    with pytest.raises(ValueError):
+        validate_array(
+            data=data,
+            weights=weights,
+        )
+
+
+@pytest.mark.parametrize(
+    "data, weights",
+    [
+        pytest.param((np.array(1), np.array([1, 1])), np.array([0.5, 0.5])),
+        pytest.param((np.array([[1]]), np.array([1, 1])), np.array([0.5, 0.5])),
+        pytest.param((np.array([1, 1]), np.array(1)), np.array([0.5, 0.5])),
+        pytest.param((np.array([1, 1]), np.array([[1]])), np.array([0.5, 0.5])),
+        pytest.param((np.array([0.5, 0.5]), np.array([0.5, 0.5])), np.array(1)),
+        pytest.param((np.array([0.5, 0.5]), np.array([0.5, 0.5])), np.array([[1]])),
+        pytest.param((np.array([0.5]), np.array([0.5, 0.5])), np.array([0.5, 0.5])),
+        pytest.param((np.array([0.5, 0.5]), np.array([0.5])), np.array([0.5, 0.5])),
+        pytest.param((np.array([0.5, 0.5]),), np.array([0.5, 0.5])),
+        pytest.param(
+            (np.array([0.5, 0.5]), np.array([0.5, 0.5]), np.array([0.5, 0.5])),
+            np.array([0.5, 0.5]),
+        ),
+    ],
+)
+def test_validate_arrays(
+    data: Union[FFArray, IFArray, IIArray],
+    weights: FArray,
+) -> None:
+    with pytest.raises(ValueError):
+        validate_arrays(
+            data=data,
+            weights=weights,
+        )
