@@ -129,9 +129,9 @@ def compute_weighted_entropy(
     Computes a weighted entropy of 1D code data.
 
     This function calculates the weighted entropy by first computing
-    the weighted distribution (via weighted bincount), dropping the zero
-    elements (contribute zero to the following sum), and computing the
-    negative dot product between the distribution and log-distribution.
+    the weighted distribution, dropping the zero elements (contribute
+    zero to the following sum), and computing the negative dot product
+    between the distribution and log-distribution.
 
     Args:
         data (IArray): A 1D array of numeric values representing
@@ -153,7 +153,8 @@ def compute_weighted_entropy(
         ```
     """
     validate_array(data=data, weights=weights)
-    distribution = np.bincount(data, weights=weights)
+    active_set = get_active_set(data=data)
+    distribution = weighted_discrete_distribution(data=active_set, weights=weights)
     distribution = distribution[distribution > 0.0]
     return -np.dot(distribution, np.log(distribution)).item()
 
@@ -772,6 +773,29 @@ def compute_weighted_variance(
     )
 
 
+def get_active_set(data: Union[FArray, IArray]) -> IArray:
+    """
+    Extracts the active set of states from a 1D array.
+
+    The active set is a gap-free collection of codes 0,...,n-1 for
+    the n unique values in the array.
+
+    Args:
+        data (FArray or IArray): A 1D array of numeric values.
+
+    Returns:
+        IArray: The active set of data.
+
+    Example:
+        ```python
+        data = np.array([1.0, 4.0, 3.0])
+        print(get_active_set(data))  # => np.array([0, 2, 1])
+        ```
+    """
+    _, active_set = np.unique(data, return_inverse=True)
+    return active_set
+
+
 def validate_array(data: Union[FArray, IArray], weights: FArray) -> None:
     """
     Validates data and weights parameters.
@@ -832,3 +856,18 @@ def validate_arrays(data: Union[FFArray, IFArray, IIArray], weights: FArray) -> 
             f"Incompatible parameters shapes {weights.shape=:} ≠ {data[1].shape=:}: "
             "must be equal."
         )
+
+
+def weighted_discrete_distribution(data: IArray, weights: FArray) -> FArray:
+    """
+    Computes the weighted discrete distribution from a 1D array.
+
+    Args:
+        data (IArray): A 1D array of code values.
+        weights (FArray): A 1D array of numeric values representing
+            the weights for the data.
+
+    Returns:
+        FArray: The weighted discrete distribution of data.
+    """
+    return cast(FArray, np.bincount(data, weights=weights))

@@ -23,8 +23,10 @@ from bbstat.statistics import (
     compute_weighted_std,
     compute_weighted_sum,
     compute_weighted_variance,
+    get_active_set,
     validate_array,
     validate_arrays,
+    weighted_discrete_distribution,
 )
 
 
@@ -437,6 +439,13 @@ def test_compute_weighted_log_odds(
     np.testing.assert_allclose(actual, expected)
 
 
+def test_get_active_set() -> None:
+    array = np.array([1, 2, 3, 2, 1, 5, 7, 9])
+    actual = get_active_set(data=array)
+    expected = np.array([0, 1, 2, 1, 0, 3, 4, 5])
+    np.testing.assert_allclose(actual, expected)
+
+
 @pytest.mark.parametrize(
     "data, weights",
     [
@@ -485,3 +494,11 @@ def test_validate_arrays(
             data=data,
             weights=weights,
         )
+
+
+def test_weighted_discrete_distribution() -> None:
+    data = np.array([1, 2, 3, 2, 1, 5, 7, 9])
+    weights = np.full(shape=data.shape, fill_value=1.0 / len(data))
+    actual = weighted_discrete_distribution(data=data, weights=weights)
+    expected = np.array([0, 2, 2, 1, 0, 1, 0, 1, 0, 1]) / len(data)
+    np.testing.assert_allclose(actual, expected)
