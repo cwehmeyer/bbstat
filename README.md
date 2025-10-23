@@ -26,13 +26,11 @@ income = np.array([
 ], dtype=np.float64)
 
 # Direct estimate of mean income
-print(np.mean(income))
->>> 52280.0
+print(np.mean(income))  # => 52280.0
 
-# Bootstrapped estimateof mean income with 95% credibility interval
+# Bootstrapped estimate of mean income with 95% credibility interval
 result = bootstrap(data=income, statistic_fn="median", coverage=0.87, seed=1)
-print(result)
->>> BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), coverage=0.87, n_boot=1000)
+print(result)  # => BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), coverage=0.87, n_boot=1000)
 ```
 
 ## API Overview
@@ -43,7 +41,7 @@ Performs Bayesian bootstrapping on input `data` using the given statistic.
 
 - `data`: 1D NumPy array, or tuple/list thereof
 - `statistic_fn`: string or callable (e.g., `"mean"`, `"median"`, or custom function)
-- `coverage`: credibility interval (default 0.95)
+- `coverage`: credibility interval (default 0.87)
 - `n_boot`: number of bootstrap samples
 - `seed`: random seed (optional)
 - `blocksize`: number of resamples to allocate in one block
