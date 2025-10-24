@@ -22,6 +22,7 @@ Supported Statistic Functions:
     - `compute_weighted_log_odds`: Weighted log-odds of a selected state
     - `compute_weighted_mean`: Weighted mean estimate
     - `compute_weighted_median`: Weighted median estimate
+    - `compute_weighted_mutual_information`: Weighted mutual information
     - `compute_weighted_pearson_dependency`: Weighted Pearson correlation
     - `compute_weighted_percentile`: Weighted percentile estimate
     - `compute_weighted_probability`: Weighted probability of a selected state

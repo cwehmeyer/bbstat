@@ -11,7 +11,7 @@ Main Features:
 Type Aliases:
     - `FArray`: Alias for `FArray`, used for floating-point data and weights.
     - `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
-    - `FFArray`, `IFArray`: Tuples of data arrays used in bivariate computations.
+    - `FFArray`, `IFArray`, `IIArray`: Tuples of data arrays used in bivariate computations.
 
 Built-in Functions:
     - `"compute_weighted_aggregate"`: Weighted dot product, optionally scaled by a factor (internal use only).
@@ -19,6 +19,7 @@ Built-in Functions:
     - `"compute_weighted_eta_square_dependency"`: Effect size for categorical-continuous variable relationships.
     - `"compute_weighted_mean"`: Weighted arithmetic mean.
     - `"compute_weighted_median"`: Weighted median.
+    - `"compute_weighted_mutual_information"`: Weighted mutual information.
     - `"compute_weighted_pearson_dependency"`: Weighted Pearson correlation for two variables.
     - `"compute_weighted_probability"`: Weighted probability of a state.
     - `"compute_weighted_quantile"` / `"compute_weighted_percentile"`: Weighted quantile estimation.
@@ -52,6 +53,7 @@ __all__ = [
     "compute_weighted_log_odds",
     "compute_weighted_mean",
     "compute_weighted_median",
+    "compute_weighted_mutual_information",
     "compute_weighted_pearson_dependency",
     "compute_weighted_percentile",
     "compute_weighted_probability",
@@ -329,6 +331,77 @@ def compute_weighted_median(
         quantile=0.5,
         sorter=sorter,
     )
+
+
+def compute_weighted_mutual_information(
+    data: IIArray,
+    weights: FArray,
+    *,
+    normalize: bool = True,
+) -> float:
+    """
+    Computes the weighted mutual information (dependency) between two 1D arrays.
+
+    This function calculates the mutual information dependency between two integer variables
+    using the direct mutual information formula on weighted joint distribution estimates.
+    The inputs `data_1` and `data_2` are expected to be 1D arrays of the same length, provided
+    as a tuple `data`. Each data point is assigned a weight from the `weights` array.
+
+    Args:
+        data (IIArray): A tuple of two 1D integer arrays `(data_1, data_2)`
+            of equal length.
+        weights (FArray): A 1D float array of weights, same length as
+            each array in `data`.
+        normalize (bool, optional): Whether or not to normalize the mutual information
+            to range [0, 1]. Default is True
+
+    Returns:
+        float: The weighted mutual information.
+
+    Raises:
+        ValueError: If the input arrays are not 1D or have mismatched lengths.
+
+    Example:
+        ```python
+        data_1 = np.array([0, 0, 1])
+        data_2 = np.array([0, 1, 1])
+        weights = np.array([0.2, 0.5, 0.3])
+        print(compute_weighted_mutual_information((data_1, data_2), weights))  # => 0.146...
+        ```
+
+    Notes:
+        - The normalized result is bounded by [0, 1], where 0 indicates perfect independence and
+          1 indicates perfect dependence.
+        - The unnormalized result is bounded between 0 (perfect independence) and
+          `min(H(data_0), H(data_1))`, where `H(data_0)` and `H(data_1)` are the entropies of
+          the two variables. If we reach the upper bound and `H(data_0) == H(data_1)`,
+          we have perfect dependence.
+    """
+    validate_arrays(data=data, weights=weights)
+    active_sets = (
+        get_active_set(data[0]),
+        get_active_set(data[1]),
+    )
+    joint_distribution = weighted_discrete_joint_distribution(
+        data=active_sets,
+        weights=weights,
+    )
+    distribution_0 = np.sum(joint_distribution, axis=1)
+    distribution_1 = np.sum(joint_distribution, axis=0)
+    divisor = np.outer(distribution_0, distribution_1).reshape(-1)
+    joint_distribution = joint_distribution.reshape(-1)
+    non_zero = joint_distribution > 0.0
+    mutual_information = np.sum(
+        joint_distribution[non_zero]
+        * np.log(joint_distribution[non_zero] / divisor[non_zero])
+    ).item()
+    if mutual_information > 0 and normalize:
+        mask = distribution_0 > 0.0
+        entropy_0 = -np.dot(distribution_0[mask], np.log(distribution_0[mask])).item()
+        mask = distribution_1 > 0.0
+        entropy_1 = -np.dot(distribution_1[mask], np.log(distribution_1[mask])).item()
+        mutual_information = 2.0 * mutual_information / (entropy_0 + entropy_1)
+    return mutual_information
 
 
 def compute_weighted_pearson_dependency(
@@ -871,3 +944,27 @@ def weighted_discrete_distribution(data: IArray, weights: FArray) -> FArray:
         FArray: The weighted discrete distribution of data.
     """
     return cast(FArray, np.bincount(data, weights=weights))
+
+
+def weighted_discrete_joint_distribution(data: IIArray, weights: FArray) -> FArray:
+    """
+    Computes the weighted discrete joint distribution from two 1D arrays.
+
+    Args:
+        data (IIArray): Tuple of two 1D arrays of code values.
+        weights (FArray): A 1D array of numeric values representing
+            the weights for the data.
+
+    Returns:
+        FArray: The weighted discrete joint distribution of data.
+    """
+    data_0, data_1 = data
+    minlength = np.max(data_1) + 1
+    rows = []
+    for state_0 in range(np.max(data_0) + 1):
+        mask = data_0 == state_0
+        rows.append(
+            np.bincount(data_1[mask], weights=weights[mask], minlength=minlength)
+        )
+    distribution = np.array(rows)
+    return cast(FArray, distribution)

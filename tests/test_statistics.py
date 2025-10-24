@@ -15,6 +15,7 @@ from bbstat.statistics import (
     compute_weighted_log_odds,
     compute_weighted_mean,
     compute_weighted_median,
+    compute_weighted_mutual_information,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
     compute_weighted_probability,
@@ -27,6 +28,7 @@ from bbstat.statistics import (
     validate_array,
     validate_arrays,
     weighted_discrete_distribution,
+    weighted_discrete_joint_distribution,
 )
 
 
@@ -193,6 +195,49 @@ def test_compute_weighted_median(
         sorter=np.argsort(data_random) if use_sorter else None,
     )
     expected = np.median(data_random)
+    np.testing.assert_allclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "data, normalize, expected",
+    [
+        pytest.param(
+            (
+                np.array([0, 0, 1, 1]),
+                np.array([0, 1, 0, 1]),
+            ),
+            True,
+            0.0,
+        ),
+        pytest.param(
+            (
+                np.array([0, 0, 1, 1]),
+                np.array([0, 0, 1, 1]),
+            ),
+            True,
+            1.0
+        ),
+        pytest.param(
+            (
+                np.array([0, 0, 1, 1]),
+                np.array([0, 0, 1, 1]),
+            ),
+            False,
+            -np.log(0.5),
+        ),
+    ],
+)
+def test_compute_weighted_mutual_information(
+    data: IIArray,
+    normalize: bool,
+    expected: float,
+) -> None:
+    weights = np.full(shape=data[0].shape, fill_value=1.0 / len(data[0]))
+    actual = compute_weighted_mutual_information(
+        data=data,
+        weights=weights,
+        normalize=normalize,
+    )
     np.testing.assert_allclose(actual, expected)
 
 
@@ -502,3 +547,27 @@ def test_weighted_discrete_distribution() -> None:
     actual = weighted_discrete_distribution(data=data, weights=weights)
     expected = np.array([0, 2, 2, 1, 0, 1, 0, 1, 0, 1]) / len(data)
     np.testing.assert_allclose(actual, expected)
+
+
+def test_weighted_discrete_joint_distribution() -> None:
+    data = (
+        np.array([1, 1, 2]),
+        np.array([0, 2, 3]),
+    )
+    weights = np.full(shape=data[0].shape, fill_value=1.0 / len(data[0]))
+    actual = weighted_discrete_joint_distribution(data=data, weights=weights)
+    expected = (
+        np.array(
+            [
+                [0, 0, 0, 0],
+                [1, 0, 1, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        / 3.0
+    )
+    np.testing.assert_allclose(actual, expected)
+    distribution_0 = weighted_discrete_distribution(data=data[0], weights=weights)
+    distribution_1 = weighted_discrete_distribution(data=data[1], weights=weights)
+    np.testing.assert_allclose(np.sum(actual, axis=1), distribution_0)
+    np.testing.assert_allclose(np.sum(actual, axis=0), distribution_1)

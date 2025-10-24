@@ -25,12 +25,14 @@ from .statistics import (
     FFArray,
     IArray,
     IFArray,
+    IIArray,
     compute_weighted_aggregate,
     compute_weighted_entropy,
     compute_weighted_eta_square_dependency,
     compute_weighted_log_odds,
     compute_weighted_mean,
     compute_weighted_median,
+    compute_weighted_mutual_information,
     compute_weighted_pearson_dependency,
     compute_weighted_percentile,
     compute_weighted_probability,
@@ -63,6 +65,7 @@ class StatisticFunction(Protocol):
     - `quantile`: requires `quantile: float` and optional `sorter: IArray`
     - `percentile`: requires `percentile: float` and optional `sorter: IArray`
     - `median`: accepts optional `sorter`
+    - `mutual_information`: accepts `data: IIArray` and `weights: FArray`, and `normalize: bool = True`
     - `pearson_dependency`, `spearman_dependency`: take tuple of two
       float arrays (`FFArray`) and `ddof`
     - `eta_square_dependency`: takes tuple of and integer and a float
@@ -96,6 +99,16 @@ class StatisticFunction(Protocol):
         self,
         data: IArray,
         weights: FArray,
+    ) -> float: ...
+
+    # mutual_information
+    @overload
+    def __call__(
+        self,
+        data: IIArray,
+        weights: FArray,
+        *,
+        normalize: bool = True,
     ) -> float: ...
 
     # probability, log_odds, self_information
@@ -174,9 +187,57 @@ STATISTIC_FUNCTIONS: Dict[str, StatisticFunction] = {
         StatisticFunction,
         compute_weighted_aggregate,
     ),
+    "entropy": cast(
+        StatisticFunction,
+        compute_weighted_entropy,
+    ),
+    "eta_square_dependency": cast(
+        StatisticFunction,
+        compute_weighted_eta_square_dependency,
+    ),
+    "log_odds": cast(
+        StatisticFunction,
+        compute_weighted_log_odds,
+    ),
     "mean": cast(
         StatisticFunction,
         compute_weighted_mean,
+    ),
+    "median": cast(
+        StatisticFunction,
+        compute_weighted_median,
+    ),
+    "mutual_information": cast(
+        StatisticFunction,
+        compute_weighted_mutual_information,
+    ),
+    "pearson_dependency": cast(
+        StatisticFunction,
+        compute_weighted_pearson_dependency,
+    ),
+    "percentile": cast(
+        StatisticFunction,
+        compute_weighted_percentile,
+    ),
+    "probability": cast(
+        StatisticFunction,
+        compute_weighted_probability,
+    ),
+    "quantile": cast(
+        StatisticFunction,
+        compute_weighted_quantile,
+    ),
+    "self_information": cast(
+        StatisticFunction,
+        compute_weighted_self_information,
+    ),
+    "spearman_dependency": cast(
+        StatisticFunction,
+        compute_weighted_spearman_dependency,
+    ),
+    "std": cast(
+        StatisticFunction,
+        compute_weighted_std,
     ),
     "sum": cast(
         StatisticFunction,
@@ -185,50 +246,6 @@ STATISTIC_FUNCTIONS: Dict[str, StatisticFunction] = {
     "variance": cast(
         StatisticFunction,
         compute_weighted_variance,
-    ),
-    "std": cast(
-        StatisticFunction,
-        compute_weighted_std,
-    ),
-    "quantile": cast(
-        StatisticFunction,
-        compute_weighted_quantile,
-    ),
-    "percentile": cast(
-        StatisticFunction,
-        compute_weighted_percentile,
-    ),
-    "median": cast(
-        StatisticFunction,
-        compute_weighted_median,
-    ),
-    "entropy": cast(
-        StatisticFunction,
-        compute_weighted_entropy,
-    ),
-    "probability": cast(
-        StatisticFunction,
-        compute_weighted_probability,
-    ),
-    "self_information": cast(
-        StatisticFunction,
-        compute_weighted_self_information,
-    ),
-    "log_odds": cast(
-        StatisticFunction,
-        compute_weighted_log_odds,
-    ),
-    "pearson_dependency": cast(
-        StatisticFunction,
-        compute_weighted_pearson_dependency,
-    ),
-    "spearman_dependency": cast(
-        StatisticFunction,
-        compute_weighted_spearman_dependency,
-    ),
-    "eta_square_dependency": cast(
-        StatisticFunction,
-        compute_weighted_eta_square_dependency,
     ),
 }
 
@@ -241,20 +258,21 @@ def get_statistic_fn(name: str) -> StatisticFunction:
         name (str): The lowercase name of the statistic function to retrieve.
             Must be one of:
             - "aggregate"
+            - "entropy"
+            - "eta_square_dependency"
+            - "log_odds"
             - "mean"
+            - "median"
+            - "mutual_information"
+            - "pearson_dependency"
+            - "percentile"
+            - "probability"
+            - "quantile"
+            - "self_information"
+            - "spearman_dependency"
+            - "std"
             - "sum"
             - "variance"
-            - "std"
-            - "quantile"
-            - "percentile"
-            - "median"
-            - "entropy"
-            - "probability"
-            - "self_information"
-            - "log_odds"
-            - "pearson_dependency"
-            - "spearman_dependency"
-            - "eta_square_dependency"
 
     Returns:
         StatisticFunction: The corresponding function implementation.

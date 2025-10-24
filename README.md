@@ -62,6 +62,7 @@ The module bbstat.statistics provides a number univariate and bivariate weighted
 - `"log_odds"`: `bbstat.statistics.compute_weighted_log_odds(data, weights, state: int)`
 - `"mean"`: `bbstat.statistics.compute_weighted_mean(data, weights)`
 - `"median"`: `bbstat.statistics.compute_weighted_median(data, weights)`
+- `"mutual_information"`: `bbstat.statistics.compute_weighted_mutual_information(data, weights)`
 - `"pearson_dependence"`: `bbstat.statistics.compute_weighted_pearson_dependence(data, weights, ddof: int = 0)`
 - `"percentile"`: `bbstat.statistics.compute_weighted_percentile(data, weights, percentile: float)`
 - `"probability"`: `bbstat.statistics.compute_weighted_probability(data, weights, state: int)`
