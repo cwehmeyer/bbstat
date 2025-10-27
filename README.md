@@ -2,7 +2,15 @@
 
 A lightweight library for Bayesian bootstrapping and statistical evaluation.
 
-## Installation from GitHub source code:
+## Installation
+
+### From PyPI:
+
+```bash
+pip install bbstat
+```
+
+### From GitHub source code:
 
 ```bash
 git clone https://github.com/cwehmeyer/bbstat.git
@@ -22,13 +30,13 @@ income = np.array([
     35_000, 36_000, 38_000, 40_000, 41_000,
     45_000, 48_000, 50_000, 52_000, 54_000,
     58_000, 60_000, 62_000, 65_000, 68_000,
-    70_000, 75_000, 80_000, 90_000, 100_000
+    70_000, 75_000, 80_000, 90_000, 100_000,
 ], dtype=np.float64)
 
 # Direct estimate of mean income
 print(np.mean(income))  # => 52280.0
 
-# Bootstrapped estimate of mean income with 95% credibility interval
+# Bootstrapped estimate of mean income with 87% credibility interval
 result = bootstrap(data=income, statistic_fn="median", coverage=0.87, seed=1)
 print(result)  # => BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), coverage=0.87, n_boot=1000)
 ```

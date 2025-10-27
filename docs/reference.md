@@ -42,6 +42,7 @@ This section documents the public API of the `bbstat` package.
       members:
         - StatisticFunction
         - get_statistic_fn
+        - get_statistic_fn_names
 
 ---
 

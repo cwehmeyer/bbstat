@@ -11,6 +11,12 @@ Welcome to **bbstat**, a lightweight library for Bayesian bootstrapping and stat
 
 ## Installation
 
+Installation from PyPi:
+
+```bash
+pip install bbstat
+```
+
 Installation from GitHub source code:
 
 ```bash
@@ -21,7 +27,7 @@ pip install .
 
 ### Optional Extras
 
-This package includes optional dependencies for development, testing, and documentation. To install them:
+This package includes optional dependencies for development, testing, and documentation. To install them from GitHub source:
 
 - For development:
 
@@ -59,7 +65,7 @@ income = np.array([
 # Direct estimate of mean income
 print(np.mean(income))  # => 52280.0
 
-# Bootstrapped estimate of mean income with 95% credibility interval
+# Bootstrapped estimate of mean income with 87% credibility interval
 result = bootstrap(data=income, statistic_fn="median", coverage=0.87, seed=1)
 print(result)  # => BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), coverage=0.87, n_boot=1000)
 ```

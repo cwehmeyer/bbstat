@@ -46,6 +46,7 @@ from .statistics import (
 
 __all__ = [
     "get_statistic_fn",
+    "get_statistic_fn_names",
     "StatisticFunction",
 ]
 

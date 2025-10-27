@@ -39,14 +39,7 @@ write_to = "bbstat/_version.py"
 check_untyped_defs = true
 
 [tool.mkdocs]
-site_name = "Your Project Docs"
-theme.name = "material"
 config_file = "mkdocs.yml"
-plugins = [
-    "mkdocs-include-markdown-plugin",
-    "mkdocstrings[python]",
-    "search"
-]
 
 [build-system]
 requires = [
