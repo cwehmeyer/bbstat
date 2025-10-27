@@ -45,9 +45,11 @@ from bbstat.evaluate import BootstrapResult, credibility_interval
 from bbstat.resample import resample
 
 from . import statistics
+from ._version import version as __version__  # type: ignore[import-untyped]
 from .bootstrap import bootstrap
 
 __all__ = [
+    "__version__",
     "bootstrap",
     "BootstrapResult",
     "credibility_interval",
