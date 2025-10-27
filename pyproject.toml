@@ -43,7 +43,7 @@ site_name = "Your Project Docs"
 theme.name = "material"
 config_file = "mkdocs.yml"
 plugins = [
-    "mkdocs-include-markdown-plugin"
+    "mkdocs-include-markdown-plugin",
     "mkdocstrings[python]",
     "search"
 ]
