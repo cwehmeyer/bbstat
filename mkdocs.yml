@@ -14,9 +14,11 @@ theme:
 
 plugins:
   - search
+  - include-markdown
   - mkdocstrings:
       default_handler: python
 
 nav:
   - Home: index.md
   - API Reference: reference.md
+  - Changelog: changelog.md

@@ -14,6 +14,7 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["bbstat"]
+include-package-data = true
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
@@ -28,6 +29,7 @@ site_name = "Your Project Docs"
 theme.name = "material"
 config_file = "mkdocs.yml"
 plugins = [
+    "mkdocs-include-markdown-plugin"
     "mkdocstrings[python]",
     "search"
 ]
@@ -52,6 +54,7 @@ docs = [
     "mkdocs-get-deps",
     "mkdocs-material",
     "mkdocs-material-extensions",
+    "mkdocs-include-markdown-plugin",
     "mkdocstrings[python]",
 ]
 dev = [
