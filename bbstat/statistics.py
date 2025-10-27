@@ -9,8 +9,8 @@ Main Features:
     - A library of built-in weighted statistical functions (e.g., mean, std, quantile, etc.)
 
 Type Aliases:
-    - `FArray`: Alias for `FArray`, used for floating-point data and weights.
-    - `IArray`: Alias for `NDArray[np.integer]`, used for index arrays.
+    - `FArray`: Alias for `numpy.typing.NDArray[numpy.floating]`, used for floating-point data and weights.
+    - `IArray`: Alias for `numpy.typing.NDArray[numpy.integer]`, used for index arrays.
     - `FFArray`, `IFArray`, `IIArray`: Tuples of data arrays used in bivariate computations.
 
 Built-in Functions:
