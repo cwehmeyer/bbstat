@@ -1,9 +1,8 @@
 site_name: bbstat
 site_url: https://cwehmeyer.github.io/bbstat/
-repo_url: https://github.com/cwehmeyer/bbstat
-repo_name: cwehmeyer/bbstat
+repo_url: https://github.com/cwehmeyer/bbstat/
 theme:
-  name: material
+  name: mkdocs
   features:
     - navigation.tabs
     - navigation.sections

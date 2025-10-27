@@ -52,8 +52,6 @@ docs = [
     "mkdocs",
     "mkdocs-autorefs",
     "mkdocs-get-deps",
-    "mkdocs-material",
-    "mkdocs-material-extensions",
     "mkdocs-include-markdown-plugin",
     "mkdocstrings[python]",
 ]
