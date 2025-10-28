@@ -19,12 +19,46 @@ dependencies = [
     "scipy >= 1.11",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest >= 7.0",
+    "pytest-cov",
+]
+docs = [
+    "mkdocs",
+    "mkdocs-autorefs",
+    "mkdocs-get-deps",
+    "mkdocs-include-markdown-plugin",
+    "mkdocstrings[python]",
+]
+lint = [
+    "black",
+    "ruff",
+]
+typecheck = [
+    "mypy",
+    "scipy-stubs",
+]
+dev = [
+    "build",
+    "pre-commit",
+    "tox",
+    "twine",
+]
+
 [project.urls]
 Homepage = "https://github.com/cwehmeyer/bbstat"
 Documentation = "https://cwehmeyer.github.io/bbstat/"
 Repository = "https://github.com/cwehmeyer/bbstat.git"
 Issues = "https://github.com/cwehmeyer/bbstat/issues"
 Changelog = "https://github.com/cwehmeyer/bbstat/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = [
+    "setuptools >= 77.0.3",
+    "setuptools-scm",
+    "wheel",
+]
 
 [tool.setuptools]
 packages = ["bbstat"]
@@ -40,34 +74,4 @@ check_untyped_defs = true
 
 [tool.mkdocs]
 config_file = "mkdocs.yml"
-
-[build-system]
-requires = [
-    "setuptools >= 77.0.3",
-    "setuptools-scm",
-    "wheel",
-]
 build-backend = "setuptools.build_meta"
-
-[project.optional-dependencies]
-test = [
-    "pytest >= 7.0",
-    "pytest-cov",
-    "scipy-stubs",
-]
-docs = [
-    "mkdocs",
-    "mkdocs-autorefs",
-    "mkdocs-get-deps",
-    "mkdocs-include-markdown-plugin",
-    "mkdocstrings[python]",
-]
-dev = [
-    "black",
-    "build",
-    "mypy",
-    "pre-commit",
-    "ruff",
-    "tox",
-    "twine",
-]
