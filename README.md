@@ -1,5 +1,8 @@
 # bbstat
 
+[![CI](https://github.com/cwehmeyer/bbstat/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/cwehmeyer/bbstat/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/cwehmeyer/bbstat/branch/main/graph/badge.svg?token=V3QV2DFJ9W)](https://codecov.io/gh/cwehmeyer/bbstat)
+
 A lightweight library for Bayesian bootstrapping and statistical evaluation.
 
 ## Installation
