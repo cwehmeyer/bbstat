@@ -1,7 +1,10 @@
 # bbstat
 
+[![PyPI version](https://img.shields.io/pypi/v/bbstat.svg)](https://pypi.org/project/bbstat/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/bbstat.svg)](https://pypi.org/project/bbstat/)
 [![CI](https://github.com/cwehmeyer/bbstat/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/cwehmeyer/bbstat/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/cwehmeyer/bbstat/branch/main/graph/badge.svg?token=V3QV2DFJ9W)](https://codecov.io/gh/cwehmeyer/bbstat)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://cwehmeyer.github.io/bbstat/)
 
 A lightweight library for Bayesian bootstrapping and statistical evaluation.
 
@@ -87,7 +90,7 @@ The module bbstat.statistics provides a number univariate and bivariate weighted
 If you want to use your own custom functions, please adhere to this pattern
 
 ```python
-def custom_statistics(data, weights, *, **kwargs) -> float
+def custom_statistic(data, weights, *, **kwargs) -> float
 ```
 
 where `data` is
