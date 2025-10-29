@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint_and_typecheck:
-    name: Lint & Typecheck
+  lint_typecheck_docs:
+    name: Lint, Typecheck, and Docs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -36,7 +36,7 @@ jobs:
       - name: Run mkdocs via tox
         run: tox -e docs
   tests:
-    needs: [lint_and_typecheck]
+    needs: [lint_typecheck_docs]
     name: Test on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
