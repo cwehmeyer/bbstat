@@ -1,12 +1,9 @@
 """Evaluation utilities for summarizing bootstrap resampling results.
 
-This module provides functions and data structures for interpreting and summarizing
-the output of Bayesian bootstrap resampling procedures. It includes tools to compute
-credibility intervals for statistical estimates and to encapsulate the results of a
-bootstrap analysis in a convenient data class.
+This module provides a data structure for interpreting and summarizing the output of
+Bayesian bootstrap resampling procedures.
 
 Main Features:
-    - `credibility_interval`: Computes a credibility interval from a set of estimates.
     - `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
       and automatically evaluates the credibility interval.
 
@@ -18,13 +15,10 @@ Example:
     ```
 
 Notes:
-    - The credibility interval is calculated using quantiles of the empirical distribution
-      of bootstrap estimates.
     - This module is designed to be used alongside the `bootstrap` and `resample` modules
       to provide complete statistical summaries of resampled data.
 """
 
-import math
 from dataclasses import dataclass, field
 from typing import Optional, Tuple
 
@@ -33,55 +27,9 @@ import numpy as np
 from scipy.stats import gaussian_kde
 
 from .statistics import FArray
+from .utils import compute_credibility_interval, get_precision_from_credibility_interval
 
-__all__ = [
-    "BootstrapResult",
-    "credibility_interval",
-]
-
-
-def credibility_interval(
-    estimates: FArray,
-    coverage: float = 0.87,
-) -> Tuple[float, float]:
-    """
-    Compute the credibility interval for a set of estimates.
-
-    This function calculates the credibility interval of the given `estimates` array,
-    which is a range of values that contains a specified proportion of the data,
-    determined by the `coverage` parameter.
-
-    The credibility interval is calculated by determining the quantiles at
-    `(1 - coverage) / 2` and `1 - (1 - coverage) / 2` of the sorted `estimates` data.
-
-    Args:
-        estimates (FArray): A 1D array of floating-point numbers representing
-            the estimates from which the credibility interval will be calculated.
-        coverage (float, optional): The proportion of data to be included in the credibility
-            interval. Must be between 0 and 1 (exclusive). Default is 0.87.
-
-    Returns:
-        Tuple[float, float]: A tuple containing the lower and upper bounds of the credibility
-            interval, with the lower bound corresponding to the `(1 - coverage) / 2` quantile,
-            and the upper bound corresponding to the `1 - (1 - coverage) / 2` quantile.
-
-    Raises:
-        ValueError: If `estimates` is not a 1D array or if `coverage` is not between 0 and 1
-            (exclusive).
-
-    Example:
-        ```python
-        import numpy as np
-        estimates = np.array([1.1, 2.3, 3.5, 2.9, 4.0])
-        credibility_interval(estimates, 0.6)  # => (2.06, 3.6)
-        ```
-    """
-    if estimates.ndim != 1:
-        raise ValueError(f"Invalid parameter {estimates.ndim=:}: must be 1D array.")
-    if coverage <= 0 or coverage >= 1:
-        raise ValueError(f"Invalid parameter {coverage=:}: must be within (0, 1).")
-    edge = (1.0 - coverage) / 2.0
-    return tuple(np.quantile(estimates, [edge, 1.0 - edge]).tolist())
+__all__ = ["BootstrapResult"]
 
 
 @dataclass
@@ -133,34 +81,11 @@ class BootstrapResult:
                 between 0 and 1 (exclusive).
         """
         self.mean = np.mean(self.estimates).item()
-        self.ci = credibility_interval(
+        self.ci = compute_credibility_interval(
             estimates=self.estimates,
             coverage=self.coverage,
         )
         self.n_boot = len(self.estimates)
-
-    @staticmethod
-    def ndigits(ci: Tuple[float, float]) -> int:
-        """
-        Returns number of digits for rounding.
-
-        This method computes the number of digits for rounding mean and credibility
-        interval values for better readability. If the credibility interval has width
-        zero, we round to zero digits. Otherwise, we take one minus the floored order
-        of magnitude of the width.
-
-        Args:
-            ci (Tuple[float, float]): The lower and upper bounds of the credibility
-                interval.
-
-        Returns:
-            int: The number of digits for readable rounding.
-        """
-        lo, hi = ci
-        width = hi - lo
-        if width == 0:
-            return 0
-        return int(1 - math.floor(math.log10(abs(width))))
 
     def __str__(self) -> str:
         """
@@ -172,7 +97,7 @@ class BootstrapResult:
         Returns:
             str: A formatted string representing the bootstrap result.
         """
-        ndigits = self.ndigits(self.ci)
+        ndigits = get_precision_from_credibility_interval(self.ci)
         mean = round(number=self.mean, ndigits=ndigits)
         lo = round(number=self.ci[0], ndigits=ndigits)
         hi = round(number=self.ci[1], ndigits=ndigits)
@@ -197,7 +122,7 @@ class BootstrapResult:
         Raises:
             ValueError: If the `coverage` is not between 0 and 1.
         """
-        return credibility_interval(estimates=self.estimates, coverage=coverage)
+        return compute_credibility_interval(estimates=self.estimates, coverage=coverage)
 
     def plot(
         self,
@@ -238,7 +163,7 @@ class BootstrapResult:
             ci = self.credibility_interval(coverage=coverage)
         lo, hi = ci
 
-        ndigits = self.ndigits(ci=ci)
+        ndigits = get_precision_from_credibility_interval(ci)
         param_str = (
             f"{round(self.mean, ndigits)} ({round(lo, ndigits)}, {round(hi, ndigits)})"
         )

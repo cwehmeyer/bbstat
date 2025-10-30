@@ -2,7 +2,11 @@
 
 All notable changes to this project are documented here.
 
-<!-- ## Unreleased -->
+## [Unreleased]
+
+### Changed
+- Moved `bbstat.evaluate.BootstrapResult.ndigits` to `bbstat.utils.get_precision_from_credibility_interval`.
+- Moved `bbstat.evaluate.credibility_interval` to `bbstat.utils.compute_credibility_interval`.
 
 ## [0.1.0] - 2025-10-27
 Core logic and selected statistic functions.
