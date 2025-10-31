@@ -30,7 +30,16 @@ This section documents the public API of the `bbstat` package.
       show_source: true
       members:
         - BootstrapResult
-        - credibility_interval
+
+---
+
+## `plot` Module
+
+::: bbstat.plot
+    options:
+      show_source: true
+      members:
+        - plot
 
 ---
 
@@ -82,3 +91,14 @@ This section documents the public API of the `bbstat` package.
         - compute_weighted_std
         - compute_weighted_sum
         - compute_weighted_variance
+
+---
+
+## `utils` Module
+
+::: bbstat.utils
+    options:
+      show_source: true
+      members:
+        - compute_credibility_interval
+        - get_precision_from_credibility_interval

@@ -6,7 +6,6 @@ a resampling method based on the Bayesian interpretation of uncertainty.
 Main Features:
     - `bootstrap`: Run the Bayesian bootstrap on compatible data structures.
     - `BootstrapResult`: Analyze bootstrap outcomes with mean estimates and credibility intervals.
-    - `credibility_interval`: Compute one-dimensional credibility intervals from samples.
     - `resample`: Generate weighted samples using the Dirichlet distribution.
     - `statistics`: Collection of built-in weighted statistics.
 
@@ -36,23 +35,27 @@ Supported Statistic Functions:
 Modules:
     - `bootstrap`: Core logic for Bayesian bootstrap
     - `evaluate`: Tools for summarizing bootstrap results
+    - `plot`: Tool for visualizing bootstrap results
     - `registry`: Registry for built-in statistic functions
     - `resample`: Weighted resampling function
     - `statistics`: Built-in statistic functions
+    - `utils`: Utility functions
 """
 
-from bbstat.evaluate import BootstrapResult, credibility_interval
+from bbstat.evaluate import BootstrapResult
 from bbstat.resample import resample
 
-from . import statistics
+from . import statistics, utils
 from ._version import version as __version__  # type: ignore[import-untyped]
 from .bootstrap import bootstrap
+from .plot import plot
 
 __all__ = [
     "__version__",
     "bootstrap",
     "BootstrapResult",
-    "credibility_interval",
+    "plot",
     "resample",
     "statistics",
+    "utils",
 ]
