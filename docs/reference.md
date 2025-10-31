@@ -100,5 +100,5 @@ This section documents the public API of the `bbstat` package.
     options:
       show_source: true
       members:
-        - compute_credibility_interval
-        - get_precision_from_credibility_interval
+        - compute_credible_interval
+        - get_precision_from_credible_interval

@@ -5,7 +5,7 @@ Bayesian bootstrap resampling procedures.
 
 Main Features:
     - `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
-      and automatically evaluates the credibility interval.
+      and automatically evaluates the credible interval.
 
 Example:
     ```python
@@ -25,7 +25,7 @@ from typing import Tuple
 import numpy as np
 
 from .statistics import FArray
-from .utils import compute_credibility_interval, get_precision_from_credibility_interval
+from .utils import compute_credible_interval, get_precision_from_credible_interval
 
 __all__ = ["BootstrapResult"]
 
@@ -35,21 +35,21 @@ class BootstrapResult:
     """
     A class representing the result of a bootstrap resampling procedure.
 
-    This class stores the mean, credibility interval, and other statistics resulting
+    This class stores the mean, credible interval, and other statistics resulting
     from a Bayesian bootstrap analysis, and provides methods to display the results and
-    calculate related statistics such as the credibility interval.
+    calculate related statistics such as the credible interval.
 
     Attributes:
         mean (float): The mean of the bootstrap estimates.
-        ci (Tuple[float, float]): The lower and upper bounds of the credibility interval.
-        coverage (float): The desired coverage for the credibility interval (between 0 and 1).
+        ci (Tuple[float, float]): The lower and upper bounds of the credible interval.
+        coverage (float): The desired coverage for the credible interval (between 0 and 1).
         n_boot (int): The number of bootstrap resamples (i.e., the number of estimates).
         estimates (FArray): The array of bootstrap resample estimates.
 
     Methods:
         __post_init__: Initializes the `mean`, `ci`, and `n_boot` attributes.
         __str__: Returns a string representation of the object.
-        credibility_interval: Calculates the credibility interval for the bootstrap estimates.
+        credible_interval: Calculates the credible interval for the bootstrap estimates.
 
     Raises:
         ValueError: If `estimates` is not a 1D array or if `coverage` is not between 0 and 1
@@ -64,14 +64,14 @@ class BootstrapResult:
 
     def __post_init__(self):
         """
-        Post-initialization method to initialize the mean, credibility interval,
+        Post-initialization method to initialize the mean, credible interval,
         and the number of bootstrap resamples from the provided estimates and
         coverage paremeters.
 
         This method is automatically called after the object is initialized.
         It calculates:
             - The mean of the bootstrap estimates.
-            - The credibility interval using the provided coverage.
+            - The credible interval using the provided coverage.
             - The number of bootstrap resamples.
 
         Raises:
@@ -79,7 +79,7 @@ class BootstrapResult:
                 between 0 and 1 (exclusive).
         """
         self.mean = np.mean(self.estimates).item()
-        self.ci = compute_credibility_interval(
+        self.ci = compute_credible_interval(
             estimates=self.estimates,
             coverage=self.coverage,
         )
@@ -89,35 +89,35 @@ class BootstrapResult:
         """
         Returns a human-readable string representation of the bootstrap result.
 
-        This method formats the mean, credibility interval, coverage, and the
+        This method formats the mean, credible interval, coverage, and the
         number of bootstrap resamples for display.
 
         Returns:
             str: A formatted string representing the bootstrap result.
         """
-        ndigits = get_precision_from_credibility_interval(self.ci)
+        ndigits = get_precision_from_credible_interval(self.ci)
         mean = round(number=self.mean, ndigits=ndigits)
         lo = round(number=self.ci[0], ndigits=ndigits)
         hi = round(number=self.ci[1], ndigits=ndigits)
         return f"BootstrapResult(mean={mean}, ci={(lo, hi)}, coverage={self.coverage}, n_boot={self.n_boot})"
 
-    def credibility_interval(self, coverage: float) -> Tuple[float, float]:
+    def credible_interval(self, coverage: float) -> Tuple[float, float]:
         """
-        Calculate the credibility interval for the bootstrap estimates.
+        Calculate the credible interval for the bootstrap estimates.
 
-        This method is a wrapper for the `credibility_interval` function. It takes
+        This method is a wrapper for the `credible_interval` function. It takes
         a `coverage` value (between 0 and 1) and returns the lower and upper bounds
-        of the credibility interval.
+        of the credible interval.
 
         Args:
-            coverage (float): The desired coverage for the credibility interval
+            coverage (float): The desired coverage for the credible interval
                 (must be between 0 and 1).
 
         Returns:
-            Tuple[float, float]: The lower and upper bounds of the credibility
+            Tuple[float, float]: The lower and upper bounds of the credible
                 interval based on the given coverage.
 
         Raises:
             ValueError: If the `coverage` is not between 0 and 1.
         """
-        return compute_credibility_interval(estimates=self.estimates, coverage=coverage)
+        return compute_credible_interval(estimates=self.estimates, coverage=coverage)

@@ -5,7 +5,7 @@ a resampling method based on the Bayesian interpretation of uncertainty.
 
 Main Features:
     - `bootstrap`: Run the Bayesian bootstrap on compatible data structures.
-    - `BootstrapResult`: Analyze bootstrap outcomes with mean estimates and credibility intervals.
+    - `BootstrapResult`: Analyze bootstrap outcomes with mean estimates and credible intervals.
     - `resample`: Generate weighted samples using the Dirichlet distribution.
     - `statistics`: Collection of built-in weighted statistics.
 

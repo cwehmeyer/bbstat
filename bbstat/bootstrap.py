@@ -2,7 +2,7 @@
 
 This module provides the `bootstrap` function, which applies the Bayesian bootstrap
 resampling method to estimate a statistic (such as the mean or median) along with its
-credibility interval. It supports flexible input data formats, user-defined or
+credible interval. It supports flexible input data formats, user-defined or
 registered statistic functions, and additional customization via keyword arguments.
 
 The function is designed for use in probabilistic data analysis workflows, where
@@ -13,7 +13,7 @@ Main Features:
     - Resampling via the Bayesian bootstrap method.
     - Support for scalar or multivariate data inputs.
     - Use of string-based or function-based statistic definitions.
-    - Configurable number of resamples and credibility interval coverage.
+    - Configurable number of resamples and credible interval coverage.
     - Optional blockwise resampling for structured data.
     - Random seed control for reproducibility.
 
@@ -50,11 +50,11 @@ def bootstrap(
     fn_kwargs: Optional[Dict[str, Any]] = None,
 ) -> BootstrapResult:
     """
-    Performs Bayesian bootstrap resampling to estimate a statistic and its credibility interval.
+    Performs Bayesian bootstrap resampling to estimate a statistic and its credible interval.
 
     This function performs Bayesian bootstrap resampling by generating `n_boot` resamples from
     the provided `data` and applying the specified statistic function (`statistic_fn`). It then
-    computes the mean and credibility interval for the estimated statistic across all resamples.
+    computes the mean and credible interval for the estimated statistic across all resamples.
 
     Args:
         data (Any): The data to be resampled. It can be a 1D array, a tuple,
@@ -63,7 +63,7 @@ def bootstrap(
             bootstrap resample. It can either be the name of a registered statistic function or the
             function itself.
         n_boot (int, optional): The number of bootstrap resamples to generate. Default is 1000.
-        coverage (float, optional): The coverage level for the credibility interval (between 0 and 1).
+        coverage (float, optional): The coverage level for the credible interval (between 0 and 1).
             Default is 0.87.
         seed (int, optional): A seed for the random number generator to ensure reproducibility.
             Default is `None`, which means no fixed seed.
@@ -74,7 +74,7 @@ def bootstrap(
             the `statistic_fn` for each resample. Default is `None`.
 
     Returns:
-        BootstrapResult: An object containing the mean of the resampled statistics, the credibility
+        BootstrapResult: An object containing the mean of the resampled statistics, the credible
             interval, and other details of the bootstrap procedure.
 
     Raises:
@@ -96,7 +96,7 @@ def bootstrap(
           itself. If a string is provided, it must match the name of a function in the `statistics.registry`.
         - The function uses the `resample` function to generate bootstrap resamples and apply the statistic
           function to each resample.
-        - The default `coverage` level of 0.87 corresponds to a 87% credibility interval, but this can be
+        - The default `coverage` level of 0.87 corresponds to a 87% credible interval, but this can be
           adjusted as needed.
     """
     if isinstance(data, np.ndarray):

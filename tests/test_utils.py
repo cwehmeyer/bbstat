@@ -5,8 +5,8 @@ import pytest
 from numpy.typing import NDArray
 
 from bbstat.utils import (
-    compute_credibility_interval,
-    get_precision_from_credibility_interval,
+    compute_credible_interval,
+    get_precision_from_credible_interval,
 )
 
 
@@ -22,12 +22,12 @@ def estimates() -> NDArray[np.floating]:
         pytest.param(0.85, (0.075, 0.925)),
     ],
 )
-def test_credibility_interval(
+def test_credible_interval(
     estimates: NDArray[np.floating],
     coverage: float,
     expected: Tuple[float, float],
 ) -> None:
-    actual = compute_credibility_interval(estimates=estimates, coverage=coverage)
+    actual = compute_credible_interval(estimates=estimates, coverage=coverage)
     assert isinstance(actual, tuple)
     assert len(actual) == 2
     np.testing.assert_allclose(actual, expected)
@@ -40,11 +40,11 @@ def test_credibility_interval(
         pytest.param(np.array([[1]])),
     ],
 )
-def test_compute_credibility_interval_fail_on_ndim(
+def test_compute_credible_interval_fail_on_ndim(
     estimates: NDArray[np.floating],
 ) -> None:
     with pytest.raises(ValueError):
-        _ = compute_credibility_interval(
+        _ = compute_credible_interval(
             estimates=estimates,
             coverage=0.87,
         )
@@ -58,19 +58,19 @@ def test_compute_credibility_interval_fail_on_ndim(
         pytest.param(1),
     ],
 )
-def test_compute_credibility_interval_fail_on_coverage(
+def test_compute_credible_interval_fail_on_coverage(
     estimates: NDArray[np.floating],
     coverage: float,
 ) -> None:
     with pytest.raises(ValueError):
-        _ = compute_credibility_interval(
+        _ = compute_credible_interval(
             estimates=estimates,
             coverage=coverage,
         )
 
 
 @pytest.mark.parametrize(
-    "credibility_interval, expected",
+    "credible_interval, expected",
     [
         pytest.param((0.0, 0.0), 0),
         pytest.param((1.0, 1.0), 0),
@@ -88,7 +88,7 @@ def test_compute_credibility_interval_fail_on_coverage(
     ],
 )
 def test_bootstrap_result_ndigits(
-    credibility_interval: Tuple[float, float], expected: int
+    credible_interval: Tuple[float, float], expected: int
 ) -> None:
-    actual = get_precision_from_credibility_interval(credibility_interval)
+    actual = get_precision_from_credible_interval(credible_interval)
     assert actual == expected

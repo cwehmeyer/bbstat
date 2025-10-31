@@ -42,14 +42,14 @@ def test_bootstrap_result(
         pytest.param(0.85, (0.075, 0.925)),
     ],
 )
-def test_bootstrap_result_credibility_interval(
+def test_bootstrap_result_credible_interval(
     estimates: NDArray[np.floating],
     coverage: float,
     expected_ci: Tuple[float, float],
 ) -> None:
     bootstrap_result = BootstrapResult(estimates=estimates, coverage=0.1)
     np.testing.assert_allclose(
-        bootstrap_result.credibility_interval(coverage=coverage),
+        bootstrap_result.credible_interval(coverage=coverage),
         expected_ci,
     )
 

@@ -7,7 +7,7 @@ Main Features:
     - `plot`: Visualizes the result of a bootstrap resampling procedure.
 
 Notes:
-    - The credibility interval is calculated using quantiles of the empirical distribution
+    - The credible interval is calculated using quantiles of the empirical distribution
       of bootstrap estimates.
     - This module is designed to be used alongside the `evaluate` module to provide complete
       statistical summaries of resampled data.
@@ -20,7 +20,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 
 from .evaluate import BootstrapResult
-from .utils import get_precision_from_credibility_interval
+from .utils import get_precision_from_credible_interval
 
 
 __all__ = ["plot"]
@@ -36,21 +36,21 @@ def plot(
 ) -> plt.Axes:
     """
     Plot the kernel density estimate (KDE) of bootstrap estimates with
-    credibility interval shading and a vertical line at the mean.
+    credible interval shading and a vertical line at the mean.
 
     If an axis is provided, the plot is drawn on it; otherwise, a new figure and axis are created.
-    Displays a shaded credibility interval and labels the plot with a formatted mean
+    Displays a shaded credible interval and labels the plot with a formatted mean
     and interval. If no axis is provided, the figure further is annotated with a title and ylabel,
     ylim[0] positioned at zero, the legend is set, and a tight layout applied.
 
     Args:
         bootstrap_result (BootstrapResult): The result of a bootstrap resampling procedure.
         ax (plt.Axes, optional): Matplotlib axis to draw the plot on. If None, a new axis is created.
-        coverage (float, optional): Credibility interval coverage (e.g., 0.95 for 95% CI).
+        coverage (float, optional): Credible interval coverage (e.g., 0.95 for 95% CI).
             If None, uses the default stored in `bootstrap_result.ci`. Default is None.
         n_grid (int): Number of grid points to use for evaluating the KDE, default is 200.
         label (str, optional): Optional label for the line. If provided, the label is
-            extended to include the mean and credibility interval.
+            extended to include the mean and credible interval.
 
     Returns:
         plt.Axes: The axis object containing the plot.
@@ -64,10 +64,10 @@ def plot(
         ci = bootstrap_result.ci
         coverage = bootstrap_result.coverage
     else:
-        ci = bootstrap_result.credibility_interval(coverage=coverage)
+        ci = bootstrap_result.credible_interval(coverage=coverage)
     lo, hi = ci
 
-    ndigits = get_precision_from_credibility_interval(ci)
+    ndigits = get_precision_from_credible_interval(ci)
     param_str = f"{round(bootstrap_result.mean, ndigits)} ({round(lo, ndigits)}, {round(hi, ndigits)})"
 
     if label is not None:
