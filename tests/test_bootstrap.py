@@ -26,7 +26,7 @@ def data_random() -> FArray:
     ],
 )
 @pytest.mark.parametrize(
-    "coverage",
+    "level",
     [
         pytest.param(0.1),
         pytest.param(0.9),
@@ -50,7 +50,7 @@ def data_random() -> FArray:
 def test_bootstrap_constant(
     data_constant: FArray,
     n_boot: int,
-    coverage: float,
+    level: float,
     seed: Optional[int],
     blocksize: Optional[int],
 ) -> None:
@@ -58,13 +58,13 @@ def test_bootstrap_constant(
         data=data_constant,
         statistic_fn=compute_weighted_aggregate,
         n_boot=n_boot,
-        coverage=coverage,
+        level=level,
         seed=seed,
         blocksize=blocksize,
     )
     assert bootstrap_result.n_boot == n_boot
     assert len(bootstrap_result.estimates) == n_boot
-    assert bootstrap_result.coverage == coverage
+    assert bootstrap_result.level == level
     assert bootstrap_result.ci[0] <= bootstrap_result.ci[1]
     np.testing.assert_allclose(bootstrap_result.mean, 1.0)
     np.testing.assert_allclose(bootstrap_result.ci, 1.0)

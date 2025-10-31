@@ -16,7 +16,7 @@ def estimates() -> NDArray[np.floating]:
 
 
 @pytest.mark.parametrize(
-    "coverage, expected",
+    "level, expected",
     [
         pytest.param(0.5, (0.25, 0.75)),
         pytest.param(0.85, (0.075, 0.925)),
@@ -24,10 +24,10 @@ def estimates() -> NDArray[np.floating]:
 )
 def test_credible_interval(
     estimates: NDArray[np.floating],
-    coverage: float,
+    level: float,
     expected: Tuple[float, float],
 ) -> None:
-    actual = compute_credible_interval(estimates=estimates, coverage=coverage)
+    actual = compute_credible_interval(estimates=estimates, level=level)
     assert isinstance(actual, tuple)
     assert len(actual) == 2
     np.testing.assert_allclose(actual, expected)
@@ -46,26 +46,26 @@ def test_compute_credible_interval_fail_on_ndim(
     with pytest.raises(ValueError):
         _ = compute_credible_interval(
             estimates=estimates,
-            coverage=0.87,
+            level=0.87,
         )
 
 
 @pytest.mark.parametrize(
-    "coverage",
+    "level",
     [
         pytest.param(-1),
         pytest.param(0),
         pytest.param(1),
     ],
 )
-def test_compute_credible_interval_fail_on_coverage(
+def test_compute_credible_interval_fail_on_level(
     estimates: NDArray[np.floating],
-    coverage: float,
+    level: float,
 ) -> None:
     with pytest.raises(ValueError):
         _ = compute_credible_interval(
             estimates=estimates,
-            coverage=coverage,
+            level=level,
         )
 
 

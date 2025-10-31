@@ -30,7 +30,7 @@ def plot(
     bootstrap_result: BootstrapResult,
     *,
     ax: Optional[plt.Axes] = None,
-    coverage: Optional[float] = None,
+    level: Optional[float] = None,
     n_grid: int = 200,
     label: Optional[str] = None,
 ) -> plt.Axes:
@@ -46,7 +46,7 @@ def plot(
     Args:
         bootstrap_result (BootstrapResult): The result of a bootstrap resampling procedure.
         ax (plt.Axes, optional): Matplotlib axis to draw the plot on. If None, a new axis is created.
-        coverage (float, optional): Credible interval coverage (e.g., 0.95 for 95% CI).
+        level (float, optional): Credible interval level (e.g., 0.95 for 95% CI).
             If None, uses the default stored in `bootstrap_result.ci`. Default is None.
         n_grid (int): Number of grid points to use for evaluating the KDE, default is 200.
         label (str, optional): Optional label for the line. If provided, the label is
@@ -60,11 +60,11 @@ def plot(
     else:
         fig = None
 
-    if coverage is None:
+    if level is None:
         ci = bootstrap_result.ci
-        coverage = bootstrap_result.coverage
+        level = bootstrap_result.level
     else:
-        ci = bootstrap_result.credible_interval(coverage=coverage)
+        ci = bootstrap_result.credible_interval(level=level)
     lo, hi = ci
 
     ndigits = get_precision_from_credible_interval(ci)
@@ -97,7 +97,7 @@ def plot(
 
     if fig is not None:
         ax.set_title(
-            f"Bayesian bootstrap  •  {bootstrap_result.n_boot} resamples, {coverage * 100:.0f}% CI"
+            f"Bayesian bootstrap  •  {bootstrap_result.n_boot} resamples, {level * 100:.0f}% CI"
         )
         ax.set_ylim(0, ax.get_ylim()[1])
         ax.set_ylabel("Distribution of estimates")

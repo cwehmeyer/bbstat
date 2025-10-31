@@ -13,7 +13,7 @@ def estimates() -> NDArray[np.floating]:
 
 
 @pytest.mark.parametrize(
-    "coverage, expected_ci",
+    "level, expected_ci",
     [
         pytest.param(0.5, (0.25, 0.75)),
         pytest.param(0.85, (0.075, 0.925)),
@@ -21,13 +21,13 @@ def estimates() -> NDArray[np.floating]:
 )
 def test_bootstrap_result(
     estimates: NDArray[np.floating],
-    coverage: float,
+    level: float,
     expected_ci: Tuple[float, float],
 ) -> None:
-    actual = BootstrapResult(estimates=estimates, coverage=coverage)
+    actual = BootstrapResult(estimates=estimates, level=level)
     assert isinstance(actual, BootstrapResult)
     assert actual.n_boot == len(estimates)
-    assert actual.coverage == coverage
+    assert actual.level == level
     assert np.all(actual.estimates == estimates)
     np.testing.assert_allclose(actual.mean, 0.5)
     np.testing.assert_allclose(actual.ci, expected_ci)
@@ -36,7 +36,7 @@ def test_bootstrap_result(
 
 
 @pytest.mark.parametrize(
-    "coverage, expected_ci",
+    "level, expected_ci",
     [
         pytest.param(0.5, (0.25, 0.75)),
         pytest.param(0.85, (0.075, 0.925)),
@@ -44,18 +44,18 @@ def test_bootstrap_result(
 )
 def test_bootstrap_result_credible_interval(
     estimates: NDArray[np.floating],
-    coverage: float,
+    level: float,
     expected_ci: Tuple[float, float],
 ) -> None:
-    bootstrap_result = BootstrapResult(estimates=estimates, coverage=0.1)
+    bootstrap_result = BootstrapResult(estimates=estimates, level=0.1)
     np.testing.assert_allclose(
-        bootstrap_result.credible_interval(coverage=coverage),
+        bootstrap_result.credible_interval(level=level),
         expected_ci,
     )
 
 
 def test_bootstrap_result_str() -> None:
-    bootstrap_result = BootstrapResult(estimates=np.array([1, 1, 1]), coverage=0.87)
+    bootstrap_result = BootstrapResult(estimates=np.array([1, 1, 1]), level=0.87)
     actual = str(bootstrap_result)
-    expected = "BootstrapResult(mean=1.0, ci=(1.0, 1.0), coverage=0.87, n_boot=3)"
+    expected = "BootstrapResult(mean=1.0, ci=(1.0, 1.0), level=0.87, n_boot=3)"
     assert actual == expected

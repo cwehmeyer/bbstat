@@ -66,6 +66,6 @@ income = np.array([
 print(np.mean(income))  # => 52280.0
 
 # Bootstrapped estimate of mean income with 87% credible interval
-result = bootstrap(data=income, statistic_fn="median", coverage=0.87, seed=1)
-print(result)  # => BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), coverage=0.87, n_boot=1000)
+result = bootstrap(data=income, statistic_fn="median", level=0.87, seed=1)
+print(result)  # => BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), level=0.87, n_boot=1000)
 ```

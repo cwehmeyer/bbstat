@@ -17,7 +17,7 @@ def estimates() -> NDArray[np.floating]:
 
 @pytest.fixture(scope="module")
 def bootstrap_result(estimates) -> BootstrapResult:
-    return BootstrapResult(estimates=estimates, coverage=0.95)
+    return BootstrapResult(estimates=estimates, level=0.95)
 
 
 def test_plot_returns_axes(bootstrap_result: BootstrapResult) -> None:
@@ -26,18 +26,18 @@ def test_plot_returns_axes(bootstrap_result: BootstrapResult) -> None:
 
 
 @pytest.mark.parametrize(
-    "coverage, expected_title",
+    "level, expected_title",
     [
         pytest.param(None, "Bayesian bootstrap  •  101 resamples, 95% CI"),
         pytest.param(0.99, "Bayesian bootstrap  •  101 resamples, 99% CI"),
     ],
 )
-def test_plot_respects_coverage_in_title(
+def test_plot_respects_level_in_title(
     bootstrap_result: BootstrapResult,
-    coverage: Optional[float],
+    level: Optional[float],
     expected_title: str,
 ) -> None:
-    ax = plot(bootstrap_result, coverage=coverage)
+    ax = plot(bootstrap_result, level=level)
     actual_title = ax.get_title()
     assert isinstance(actual_title, str)
     assert actual_title == expected_title

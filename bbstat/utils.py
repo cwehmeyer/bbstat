@@ -32,31 +32,31 @@ __all__ = [
 
 def compute_credible_interval(
     estimates: FArray,
-    coverage: float = 0.87,
+    level: float = 0.87,
 ) -> Tuple[float, float]:
     """
     Compute the credible interval for a set of estimates.
 
     This function calculates the credible interval of the given `estimates` array,
     which is a range of values that contains a specified proportion of the data,
-    determined by the `coverage` parameter.
+    determined by the `level` parameter.
 
     The credible interval is calculated by determining the quantiles at
-    `(1 - coverage) / 2` and `1 - (1 - coverage) / 2` of the sorted `estimates` data.
+    `(1 - level) / 2` and `1 - (1 - level) / 2` of the sorted `estimates` data.
 
     Args:
         estimates (FArray): A 1D array of floating-point numbers representing
             the estimates from which the credible interval will be calculated.
-        coverage (float, optional): The proportion of data to be included in the credible
+        level (float, optional): The proportion of data to be included in the credible
             interval. Must be between 0 and 1 (exclusive). Default is 0.87.
 
     Returns:
         Tuple[float, float]: A tuple containing the lower and upper bounds of the credible
-            interval, with the lower bound corresponding to the `(1 - coverage) / 2` quantile,
-            and the upper bound corresponding to the `1 - (1 - coverage) / 2` quantile.
+            interval, with the lower bound corresponding to the `(1 - level) / 2` quantile,
+            and the upper bound corresponding to the `1 - (1 - level) / 2` quantile.
 
     Raises:
-        ValueError: If `estimates` is not a 1D array or if `coverage` is not between 0 and 1
+        ValueError: If `estimates` is not a 1D array or if `level` is not between 0 and 1
             (exclusive).
 
     Example:
@@ -68,9 +68,9 @@ def compute_credible_interval(
     """
     if estimates.ndim != 1:
         raise ValueError(f"Invalid parameter {estimates.ndim=:}: must be 1D array.")
-    if coverage <= 0 or coverage >= 1:
-        raise ValueError(f"Invalid parameter {coverage=:}: must be within (0, 1).")
-    edge = (1.0 - coverage) / 2.0
+    if level <= 0 or level >= 1:
+        raise ValueError(f"Invalid parameter {level=:}: must be within (0, 1).")
+    edge = (1.0 - level) / 2.0
     return tuple(np.quantile(estimates, [edge, 1.0 - edge]).tolist())
 
 

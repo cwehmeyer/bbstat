@@ -13,7 +13,7 @@ Main Features:
     - Resampling via the Bayesian bootstrap method.
     - Support for scalar or multivariate data inputs.
     - Use of string-based or function-based statistic definitions.
-    - Configurable number of resamples and credible interval coverage.
+    - Configurable number of resamples and credible interval level.
     - Optional blockwise resampling for structured data.
     - Random seed control for reproducibility.
 
@@ -44,7 +44,7 @@ def bootstrap(
     data: Any,
     statistic_fn: Union[str, Callable],
     n_boot: int = 1000,
-    coverage: float = 0.87,
+    level: float = 0.87,
     seed: Optional[int] = None,
     blocksize: Optional[int] = None,
     fn_kwargs: Optional[Dict[str, Any]] = None,
@@ -63,7 +63,7 @@ def bootstrap(
             bootstrap resample. It can either be the name of a registered statistic function or the
             function itself.
         n_boot (int, optional): The number of bootstrap resamples to generate. Default is 1000.
-        coverage (float, optional): The coverage level for the credible interval (between 0 and 1).
+        level (float, optional): The level for the credible interval (between 0 and 1).
             Default is 0.87.
         seed (int, optional): A seed for the random number generator to ensure reproducibility.
             Default is `None`, which means no fixed seed.
@@ -96,7 +96,7 @@ def bootstrap(
           itself. If a string is provided, it must match the name of a function in the `statistics.registry`.
         - The function uses the `resample` function to generate bootstrap resamples and apply the statistic
           function to each resample.
-        - The default `coverage` level of 0.87 corresponds to a 87% credible interval, but this can be
+        - The default `level` of 0.87 corresponds to a 87% credible interval, but this can be
           adjusted as needed.
     """
     if isinstance(data, np.ndarray):
@@ -126,4 +126,4 @@ def bootstrap(
             )
         ]
     )
-    return BootstrapResult(estimates=estimates, coverage=coverage)
+    return BootstrapResult(estimates=estimates, level=level)

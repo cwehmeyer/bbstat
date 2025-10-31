@@ -10,8 +10,8 @@ Main Features:
 Example:
     ```python
     from bbstat.evaluate import BootstrapResult
-    result = BootstrapResult(estimates=np.array([5.0, 2.3, 2.9]), coverage=0.95)
-    print(result)  # => BootstrapResult(mean=3.4, ci=(2.3, 4.9), coverage=0.95, n_boot=3)
+    result = BootstrapResult(estimates=np.array([5.0, 2.3, 2.9]), level=0.95)
+    print(result)  # => BootstrapResult(mean=3.4, ci=(2.3, 4.9), level=0.95, n_boot=3)
     ```
 
 Notes:
@@ -42,7 +42,7 @@ class BootstrapResult:
     Attributes:
         mean (float): The mean of the bootstrap estimates.
         ci (Tuple[float, float]): The lower and upper bounds of the credible interval.
-        coverage (float): The desired coverage for the credible interval (between 0 and 1).
+        level (float): The desired level for the credible interval (between 0 and 1).
         n_boot (int): The number of bootstrap resamples (i.e., the number of estimates).
         estimates (FArray): The array of bootstrap resample estimates.
 
@@ -52,13 +52,13 @@ class BootstrapResult:
         credible_interval: Calculates the credible interval for the bootstrap estimates.
 
     Raises:
-        ValueError: If `estimates` is not a 1D array or if `coverage` is not between 0 and 1
+        ValueError: If `estimates` is not a 1D array or if `level` is not between 0 and 1
             (exclusive).
     """
 
     mean: float = field(init=False)
     ci: Tuple[float, float] = field(init=False)
-    coverage: float
+    level: float
     n_boot: int = field(init=False)
     estimates: FArray
 
@@ -66,22 +66,22 @@ class BootstrapResult:
         """
         Post-initialization method to initialize the mean, credible interval,
         and the number of bootstrap resamples from the provided estimates and
-        coverage paremeters.
+        level paremeters.
 
         This method is automatically called after the object is initialized.
         It calculates:
             - The mean of the bootstrap estimates.
-            - The credible interval using the provided coverage.
+            - The credible interval using the provided level.
             - The number of bootstrap resamples.
 
         Raises:
-            ValueError: If `estimates` is not a 1D array or if `coverage` is not
+            ValueError: If `estimates` is not a 1D array or if `level` is not
                 between 0 and 1 (exclusive).
         """
         self.mean = np.mean(self.estimates).item()
         self.ci = compute_credible_interval(
             estimates=self.estimates,
-            coverage=self.coverage,
+            level=self.level,
         )
         self.n_boot = len(self.estimates)
 
@@ -89,7 +89,7 @@ class BootstrapResult:
         """
         Returns a human-readable string representation of the bootstrap result.
 
-        This method formats the mean, credible interval, coverage, and the
+        This method formats the mean, credible interval, level, and the
         number of bootstrap resamples for display.
 
         Returns:
@@ -99,25 +99,25 @@ class BootstrapResult:
         mean = round(number=self.mean, ndigits=ndigits)
         lo = round(number=self.ci[0], ndigits=ndigits)
         hi = round(number=self.ci[1], ndigits=ndigits)
-        return f"BootstrapResult(mean={mean}, ci={(lo, hi)}, coverage={self.coverage}, n_boot={self.n_boot})"
+        return f"BootstrapResult(mean={mean}, ci={(lo, hi)}, level={self.level}, n_boot={self.n_boot})"
 
-    def credible_interval(self, coverage: float) -> Tuple[float, float]:
+    def credible_interval(self, level: float) -> Tuple[float, float]:
         """
         Calculate the credible interval for the bootstrap estimates.
 
         This method is a wrapper for the `credible_interval` function. It takes
-        a `coverage` value (between 0 and 1) and returns the lower and upper bounds
+        a `level` value (between 0 and 1) and returns the lower and upper bounds
         of the credible interval.
 
         Args:
-            coverage (float): The desired coverage for the credible interval
+            level (float): The desired level for the credible interval
                 (must be between 0 and 1).
 
         Returns:
             Tuple[float, float]: The lower and upper bounds of the credible
-                interval based on the given coverage.
+                interval based on the given level.
 
         Raises:
-            ValueError: If the `coverage` is not between 0 and 1.
+            ValueError: If the `level` is not between 0 and 1.
         """
-        return compute_credible_interval(estimates=self.estimates, coverage=coverage)
+        return compute_credible_interval(estimates=self.estimates, level=level)
