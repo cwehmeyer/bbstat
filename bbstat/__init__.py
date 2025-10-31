@@ -35,6 +35,7 @@ Supported Statistic Functions:
 Modules:
     - `bootstrap`: Core logic for Bayesian bootstrap
     - `evaluate`: Tools for summarizing bootstrap results
+    - `plot`: Tool for visualizing bootstrap results
     - `registry`: Registry for built-in statistic functions
     - `resample`: Weighted resampling function
     - `statistics`: Built-in statistic functions
@@ -47,11 +48,13 @@ from bbstat.resample import resample
 from . import statistics, utils
 from ._version import version as __version__  # type: ignore[import-untyped]
 from .bootstrap import bootstrap
+from .plot import plot
 
 __all__ = [
     "__version__",
     "bootstrap",
     "BootstrapResult",
+    "plot",
     "resample",
     "statistics",
     "utils",

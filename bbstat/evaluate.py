@@ -20,11 +20,9 @@ Notes:
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, Tuple
+from typing import Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import gaussian_kde
 
 from .statistics import FArray
 from .utils import compute_credibility_interval, get_precision_from_credibility_interval
@@ -123,80 +121,3 @@ class BootstrapResult:
             ValueError: If the `coverage` is not between 0 and 1.
         """
         return compute_credibility_interval(estimates=self.estimates, coverage=coverage)
-
-    def plot(
-        self,
-        ax: Optional[plt.Axes] = None,
-        coverage: Optional[float] = None,
-        n_grid: int = 200,
-        label: Optional[str] = None,
-    ) -> plt.Axes:
-        """
-        Plot the kernel density estimate (KDE) of bootstrap estimates with
-        credibility interval shading and a vertical line at the mean.
-
-        If an axis is provided, the plot is drawn on it; otherwise, a new figure and axis are created.
-        Displays a shaded credibility interval and labels the plot with a formatted mean
-        and interval. If no axis is provided, the figure further is annotated with a title and ylabel,
-        ylim[0] positioned at zero, the legend is set, and a tight layout applied.
-
-        Args:
-            ax (plt.Axes, optional): Matplotlib axis to draw the plot on. If None, a new axis is created.
-            coverage (float, optional): Credibility interval coverage (e.g., 0.95 for 95% CI).
-                If None, uses the default stored in `self.ci`. Default is None.
-            n_grid (int): Number of grid points to use for evaluating the KDE, default is 200.
-            label (str, optional): Optional label for the line. If provided, the label is
-                extended to include the mean and credibility interval.
-
-        Returns:
-            plt.Axes: The axis object containing the plot.
-        """
-        if ax is None:
-            fig, ax = plt.subplots(figsize=(8, 4.5))
-        else:
-            fig = None
-
-        if coverage is None:
-            ci = self.ci
-            coverage = self.coverage
-        else:
-            ci = self.credibility_interval(coverage=coverage)
-        lo, hi = ci
-
-        ndigits = get_precision_from_credibility_interval(ci)
-        param_str = (
-            f"{round(self.mean, ndigits)} ({round(lo, ndigits)}, {round(hi, ndigits)})"
-        )
-
-        if label is not None:
-            param_str = f"{label}={param_str}"
-
-        p = gaussian_kde(self.estimates)
-
-        x_grid = np.linspace(self.estimates.min(), self.estimates.max(), n_grid)
-        within_ci = np.logical_and(x_grid >= lo, x_grid <= hi)
-        y_grid = p(x_grid)
-        y_mean = p([self.mean]).item()
-
-        (line,) = ax.plot(x_grid, y_grid, label=param_str)
-        color = line.get_color()
-
-        ax.fill_between(
-            x_grid[within_ci],
-            0,
-            y_grid[within_ci],
-            facecolor=color,
-            alpha=0.5,
-        )
-        ax.plot([self.mean] * 2, [0, y_mean], "--", color=color)
-        ax.plot([self.mean], [y_mean], "o", color=color)
-
-        if fig is not None:
-            ax.set_title(
-                f"Bayesian bootstrap  •  {self.n_boot} resamples, {coverage * 100:.0f}% CI"
-            )
-            ax.set_ylim(0, ax.get_ylim()[1])
-            ax.set_ylabel("Distribution of estimates")
-            ax.legend()
-            fig.tight_layout()
-        return ax

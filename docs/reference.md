@@ -33,6 +33,16 @@ This section documents the public API of the `bbstat` package.
 
 ---
 
+## `plot` Module
+
+::: bbstat.plot
+    options:
+      show_source: true
+      members:
+        - plot
+
+---
+
 ## `registry` Module
 
 ::: bbstat.registry
