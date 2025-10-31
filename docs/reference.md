@@ -101,4 +101,4 @@ This section documents the public API of the `bbstat` package.
       show_source: true
       members:
         - compute_credible_interval
-        - get_precision_from_credible_interval
+        - get_precision_for_rounding

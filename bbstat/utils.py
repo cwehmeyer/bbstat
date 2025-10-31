@@ -7,7 +7,7 @@ rounding mean and crebilility interval values from the width of the latter.
 
 Main Features:
     - `compute_credible_interval`: Computes a credible interval from a set of estimates.
-    - `get_precision_from_credible_interval`: Gauges the precision for rounding from the
+    - `get_precision_for_rounding`: Gauges the precision for rounding from the
       width of the credible interval.
 
 Notes:
@@ -26,7 +26,7 @@ from .statistics import FArray
 
 __all__ = [
     "compute_credible_interval",
-    "get_precision_from_credible_interval",
+    "get_precision_for_rounding",
 ]
 
 
@@ -74,9 +74,7 @@ def compute_credible_interval(
     return tuple(np.quantile(estimates, [edge, 1.0 - edge]).tolist())
 
 
-def get_precision_from_credible_interval(
-    credible_interval: Tuple[float, float],
-) -> int:
+def get_precision_for_rounding(ci_width: float) -> int:
     """
     Returns number of digits for rounding.
 
@@ -86,14 +84,16 @@ def get_precision_from_credible_interval(
     order of magnitude of the width.
 
     Args:
-        credible_interval (Tuple[float, float]): The credible interval given
-            by its lower and upper bounds.
+        ci_width (float): The width of the credible interval.
 
     Returns:
         int: The number of digits for rounding.
+
+    Raises:
+        ValueError: If `ci_width` is negative or NaN.
     """
-    lo, hi = credible_interval
-    width = abs(hi - lo)  # use abs in case the values are swapped
-    if width == 0:
+    if np.isnan(ci_width) or ci_width < 0.0:
+        raise ValueError(f"Invalid parameter {ci_width=:}: must be non-negative.")
+    if ci_width == 0:
         return 0
-    return int(1 - math.floor(math.log10(width)))
+    return int(1 - math.floor(math.log10(ci_width)))

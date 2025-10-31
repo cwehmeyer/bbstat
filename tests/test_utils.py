@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 from bbstat.utils import (
     compute_credible_interval,
-    get_precision_from_credible_interval,
+    get_precision_for_rounding,
 )
 
 
@@ -70,25 +70,32 @@ def test_compute_credible_interval_fail_on_level(
 
 
 @pytest.mark.parametrize(
-    "credible_interval, expected",
+    "ci_width, expected",
     [
-        pytest.param((0.0, 0.0), 0),
-        pytest.param((1.0, 1.0), 0),
-        pytest.param((0.0, 1.0), 1),
-        pytest.param((0.0, 9.9), 1),
-        pytest.param((0.0, 0.1), 2),
-        pytest.param((0.0, 0.999), 2),
-        pytest.param((0.0, 0.01), 3),
-        pytest.param((0.0, 0.0999), 3),
-        pytest.param((0.0, 10.0), 0),
-        pytest.param((0.0, 99.9), 0),
-        pytest.param((0.0, 100.0), -1),
-        pytest.param((9.9, 0.0), 1),
-        pytest.param((0.1, 0.0), 2),
+        pytest.param(0.0, 0),
+        pytest.param(0.01, 3),
+        pytest.param(0.0999, 3),
+        pytest.param(0.1, 2),
+        pytest.param(0.999, 2),
+        pytest.param(1.0, 1),
+        pytest.param(9.9, 1),
+        pytest.param(10.0, 0),
+        pytest.param(99.9, 0),
+        pytest.param(100.0, -1),
     ],
 )
-def test_bootstrap_result_ndigits(
-    credible_interval: Tuple[float, float], expected: int
-) -> None:
-    actual = get_precision_from_credible_interval(credible_interval)
+def test_get_precision_for_rounding(ci_width: float, expected: int) -> None:
+    actual = get_precision_for_rounding(ci_width)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "ci_width",
+    [
+        pytest.param(-1.0),
+        pytest.param(np.nan),
+    ],
+)
+def test_get_precision_for_rounding_fail(ci_width: float) -> None:
+    with pytest.raises(ValueError):
+        _ = get_precision_for_rounding(ci_width)

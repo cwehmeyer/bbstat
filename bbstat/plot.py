@@ -20,7 +20,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 
 from .evaluate import BootstrapResult
-from .utils import get_precision_from_credible_interval
+from .utils import get_precision_for_rounding
 
 
 __all__ = ["plot"]
@@ -67,7 +67,7 @@ def plot(
         ci = bootstrap_result.credible_interval(level=level)
     lo, hi = ci
 
-    ndigits = get_precision_from_credible_interval(ci)
+    ndigits = get_precision_for_rounding(hi - lo)
     param_str = f"{round(bootstrap_result.mean, ndigits)} ({round(lo, ndigits)}, {round(hi, ndigits)})"
 
     if label is not None:

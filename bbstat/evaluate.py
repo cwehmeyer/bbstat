@@ -25,7 +25,7 @@ from typing import Tuple
 import numpy as np
 
 from .statistics import FArray
-from .utils import compute_credible_interval, get_precision_from_credible_interval
+from .utils import compute_credible_interval, get_precision_for_rounding
 
 __all__ = ["BootstrapResult"]
 
@@ -95,7 +95,7 @@ class BootstrapResult:
         Returns:
             str: A formatted string representing the bootstrap result.
         """
-        ndigits = get_precision_from_credible_interval(self.ci)
+        ndigits = get_precision_for_rounding(self.ci[1] - self.ci[0])
         mean = round(number=self.mean, ndigits=ndigits)
         lo = round(number=self.ci[0], ndigits=ndigits)
         hi = round(number=self.ci[1], ndigits=ndigits)

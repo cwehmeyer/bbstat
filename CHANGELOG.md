@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 ## [Unreleased]
 
 ### Changed
-- Moved `bbstat.evaluate.BootstrapResult.ndigits` to `bbstat.utils.get_precision_from_credibility_interval`.
+- Moved `bbstat.evaluate.BootstrapResult.ndigits` to `bbstat.utils.get_precision_for_rounding` and changed parameter from interval bounds to width.
 - Moved `bbstat.evaluate.credibility_interval` to `bbstat.utils.compute_credibility_interval`.
 - Moved `bbstat.evaluate.BootstrapResult.plot` to `bbstat.plot.plot`.
 - Renamed all instances "credibility" -> "credible" and "coverage" -> "level".
