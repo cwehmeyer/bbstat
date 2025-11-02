@@ -4,6 +4,9 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+- `bbstat.evaluate.BootstrapSummary`: summarises a bootstraped distribution of estimates.
+
 ### Changed
 - Moved `bbstat.evaluate.BootstrapResult.ndigits` to `bbstat.utils.get_precision_for_rounding` and changed parameter from interval bounds to width.
 - Moved `bbstat.evaluate.credibility_interval` to `bbstat.utils.compute_credibility_interval`.

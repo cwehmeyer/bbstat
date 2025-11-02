@@ -6,6 +6,8 @@ Bayesian bootstrap resampling procedures.
 Main Features:
     - `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
       and automatically evaluates the credible interval.
+    - `BootstrapSummary`: A frozen data class that holds the summary (mean, credible interval,
+      and level) of a Bayesian bootstrap procedure's result.
 
 Example:
     ```python
@@ -20,14 +22,146 @@ Notes:
 """
 
 from dataclasses import dataclass, field
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 
 from .statistics import FArray
 from .utils import compute_credible_interval, get_precision_for_rounding
 
-__all__ = ["BootstrapResult"]
+__all__ = [
+    "BootstrapResult",
+    "BootstrapSummary",
+]
+
+
+@dataclass(frozen=True)
+class BootstrapSummary:
+    """
+    A class representing the summary of a Bayesian bootstrap resampling procedure.
+
+    This class stores the mean, the credible interval, and level.
+
+    Attributes:
+        mean (float): The mean of the bootstrap estimates.
+        ci_low (float): The lower bound of the credible interval.
+        ci_high (float): The upper bound of the credible interval.
+        level (float): The desired level for the credible interval (between 0 and 1).
+        ci_width (float): The width of the credible interval (property).
+
+    Methods:
+        __post_init__: Validates the `mean`, `ci_low`, `ci_high`, and `level` attributes.
+        round: Returns a new version of the summary with rounded values.
+        from_estimates: Creates a summary object from estimates.
+
+    Raises:
+        ValueError: If `mean`, `ci_low`, `ci_high`, or `level` are NaN.
+        ValueError: If the bounds are swapped, `ci_low > ci_high`.
+        ValueError: If `level` is not between 0 and 1 (exclusive).
+    """
+
+    mean: float
+    ci_low: float
+    ci_high: float
+    level: float
+
+    def __post_init__(self) -> None:
+        """
+        Post-initialization method to validate the `mean`, `ci_low`,
+        `ci_high`, and `level` attributes.
+
+        Raises:
+            ValueError: If `mean`, `ci_low`, `ci_high`, or `level` are NaN.
+            ValueError: If the bounds are swapped, `ci_low > ci_high`.
+            ValueError: If `level` is not between 0 and 1 (exclusive).
+        """
+        if np.isnan(self.mean):
+            raise ValueError("Invalid parameter mean: must not be NaN.")
+        if np.isnan(self.ci_low):
+            raise ValueError("Invalid parameter ci_low: must not be NaN.")
+        if np.isnan(self.ci_high):
+            raise ValueError("Invalid parameter ci_high: must not be NaN.")
+        if np.isnan(self.level):
+            raise ValueError("Invalid parameter level: must not be NaN.")
+        if self.ci_low > self.ci_high:
+            raise ValueError(
+                f"Invalid parameters {self.ci_low=:} and {self.ci_high=:}: "
+                "higher end is smaller than lower end."
+            )
+        if self.level <= 0 or self.level >= 1:
+            raise ValueError(
+                f"Invalid parameter {self.level=:}: must be within (0, 1)."
+            )
+        if self.mean < self.ci_low or self.mean > self.ci_high:
+            raise ValueError(
+                f"Invalid parameter {self.mean=:}: is outside the credible interval "
+                f"{self.ci_low=:}, {self.ci_high}."
+            )
+
+    @property
+    def ci_width(self) -> float:
+        """Returns the width of the credible interval."""
+        return self.ci_high - self.ci_low
+
+    def round(self, precision: Optional[int] = None) -> "BootstrapSummary":
+        """
+        Returns a new version of the summary with rounded values.
+
+        When `precision` is given, the mean and credible interval bounds are rounded
+        to this number of digits. If `precision=None` (default), the precision is
+        computed form the width of the credible interval.
+
+        Args:
+            precision (int, optional): The desired precision for rounding.
+
+        Returns:
+            BootstrapSummary: The summary of a Bayesian bootstrap procedure's result.
+        """
+        if precision is None:
+            precision = get_precision_for_rounding(self.ci_width)
+        return self.__class__(
+            mean=round(self.mean, precision),
+            ci_low=round(self.ci_low, precision),
+            ci_high=round(self.ci_high, precision),
+            level=self.level,
+        )
+
+    @classmethod
+    def from_estimates(
+        cls,
+        estimates: FArray,
+        *,
+        level: float = 0.87,
+    ) -> "BootstrapSummary":
+        """
+        Creates a summary object from estimates.
+
+        This method computes the `mean` and credible interval bounds `ci_low` and
+        `ci_high`, and creates a `BootstrapSummary` object.
+
+        Args:
+            estimates (FArray): The estimated values from a Bayesian bootstrap procedure.
+            level (float): The desired level for the credible interval (between 0 and 1),
+                default is 0.87.
+
+        Returns:
+            BootstrapSummary: The summary of a Bayesian bootstrap procedure's result.
+
+        Raises:
+            ValueError: If estimates is empty, not a 1D array, or contains NaN values.
+            ValueError: If level is not between 0 and 1 (exclusive).
+        """
+        if estimates.ndim != 1:
+            raise ValueError(f"Invalid parameter {estimates.ndim=}: must be 1.")
+        if len(estimates) < 1:
+            raise ValueError("Invalid parameter estimates: must not be empty.")
+        if np.isnan(estimates).any():
+            raise ValueError(
+                "Invalid parameter estimates: must not contain NaN values."
+            )
+        mean = np.mean(estimates).item()
+        ci_low, ci_high = compute_credible_interval(estimates=estimates, level=level)
+        return cls(mean=mean, ci_low=ci_low, ci_high=ci_high, level=level)
 
 
 @dataclass
