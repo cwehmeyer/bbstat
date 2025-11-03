@@ -28,7 +28,7 @@ pip install .
 
 ```python
 import numpy as np
-import bbstat
+from bbstat import bootstrap
 
 # Data preparation: simulated income for a small population (e.g., a survey of 25 people)
 income = np.array([
@@ -42,20 +42,25 @@ income = np.array([
 # Direct estimate of mean income
 print(np.mean(income))  # => 52280.0
 
-# Bootstrapped estimate of mean income with 87% credibility interval
-result = bootstrap(data=income, statistic_fn="median", coverage=0.87, seed=1)
-print(result)  # => BootstrapResult(mean=50000.0, ci=(40000.0, 59000.0), coverage=0.87, n_boot=1000)
+# Bootstrapped distribution of the mean income.
+distribution = bootstrap(data=income, statistic_fn="mean", seed=1)
+print(distribution)  # => BootstrapDistribution(mean=52263.8..., size=1000)
+
+# Summarize the bootstrapped distribution of the mean income.
+summary = distribution.summarize(level=0.87)
+print(summary)  # => BootstrapSummary(mean=52263.8..., ci_low=46566.8..., ci_high=58453.6..., level=0.87)
+print(summary.round())  # => BootstrapSummary(mean=52000.0, ci_low=47000.0, ci_high=58000.0, level=0.87)
 ```
 
 ## API Overview
 
-### `bootstrap(data, statistic_fn, coverage=0.87, n_boot=1000, ...)`
+### `bootstrap(data, statistic_fn, n_boot=1000, ...)`
 
 Performs Bayesian bootstrapping on input `data` using the given statistic.
 
 - `data`: 1D NumPy array, or tuple/list thereof
 - `statistic_fn`: string or callable (e.g., `"mean"`, `"median"`, or custom function)
-- `coverage`: credibility interval (default 0.87)
+- `level`: credible interval (default 0.87)
 - `n_boot`: number of bootstrap samples
 - `seed`: random seed (optional)
 - `blocksize`: number of resamples to allocate in one block
@@ -63,8 +68,8 @@ Performs Bayesian bootstrapping on input `data` using the given statistic.
 
 Returns a `BootstrapResult` with:
 - `.mean`: estimated statistic value
-- `.ci`: tuple representing lower and upper bounds of the credibility interval
-- `.coverage`: credibility level used
+- `.ci`: tuple representing lower and upper bounds of the credible interval
+- `.level`: credible level used
 - `.n_boot`: number of bootstraps performed
 - `.estimates`: array of statistic values computed across the bootstrapped posterior samples
 

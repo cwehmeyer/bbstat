@@ -5,8 +5,8 @@ import pytest
 from numpy.typing import NDArray
 
 from bbstat.utils import (
-    compute_credibility_interval,
-    get_precision_from_credibility_interval,
+    compute_credible_interval,
+    get_precision_for_rounding,
 )
 
 
@@ -16,18 +16,18 @@ def estimates() -> NDArray[np.floating]:
 
 
 @pytest.mark.parametrize(
-    "coverage, expected",
+    "level, expected",
     [
         pytest.param(0.5, (0.25, 0.75)),
         pytest.param(0.85, (0.075, 0.925)),
     ],
 )
-def test_credibility_interval(
+def test_credible_interval(
     estimates: NDArray[np.floating],
-    coverage: float,
+    level: float,
     expected: Tuple[float, float],
 ) -> None:
-    actual = compute_credibility_interval(estimates=estimates, coverage=coverage)
+    actual = compute_credible_interval(estimates=estimates, level=level)
     assert isinstance(actual, tuple)
     assert len(actual) == 2
     np.testing.assert_allclose(actual, expected)
@@ -40,55 +40,62 @@ def test_credibility_interval(
         pytest.param(np.array([[1]])),
     ],
 )
-def test_compute_credibility_interval_fail_on_ndim(
+def test_compute_credible_interval_fail_on_ndim(
     estimates: NDArray[np.floating],
 ) -> None:
     with pytest.raises(ValueError):
-        _ = compute_credibility_interval(
+        _ = compute_credible_interval(
             estimates=estimates,
-            coverage=0.87,
+            level=0.87,
         )
 
 
 @pytest.mark.parametrize(
-    "coverage",
+    "level",
     [
         pytest.param(-1),
         pytest.param(0),
         pytest.param(1),
     ],
 )
-def test_compute_credibility_interval_fail_on_coverage(
+def test_compute_credible_interval_fail_on_level(
     estimates: NDArray[np.floating],
-    coverage: float,
+    level: float,
 ) -> None:
     with pytest.raises(ValueError):
-        _ = compute_credibility_interval(
+        _ = compute_credible_interval(
             estimates=estimates,
-            coverage=coverage,
+            level=level,
         )
 
 
 @pytest.mark.parametrize(
-    "credibility_interval, expected",
+    "ci_width, expected",
     [
-        pytest.param((0.0, 0.0), 0),
-        pytest.param((1.0, 1.0), 0),
-        pytest.param((0.0, 1.0), 1),
-        pytest.param((0.0, 9.9), 1),
-        pytest.param((0.0, 0.1), 2),
-        pytest.param((0.0, 0.999), 2),
-        pytest.param((0.0, 0.01), 3),
-        pytest.param((0.0, 0.0999), 3),
-        pytest.param((0.0, 10.0), 0),
-        pytest.param((0.0, 99.9), 0),
-        pytest.param((0.0, 100.0), -1),
-        pytest.param((9.9, 0.0), 1),
-        pytest.param((0.1, 0.0), 2),
+        pytest.param(0.0, 0),
+        pytest.param(0.01, 3),
+        pytest.param(0.0999, 3),
+        pytest.param(0.1, 2),
+        pytest.param(0.999, 2),
+        pytest.param(1.0, 1),
+        pytest.param(9.9, 1),
+        pytest.param(10.0, 0),
+        pytest.param(99.9, 0),
+        pytest.param(100.0, -1),
     ],
 )
-def test_bootstrap_result_ndigits(
-    credibility_interval: Tuple[float, float], expected: int
-) -> None:
-    actual = get_precision_from_credibility_interval(credibility_interval)
+def test_get_precision_for_rounding(ci_width: float, expected: int) -> None:
+    actual = get_precision_for_rounding(ci_width)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "ci_width",
+    [
+        pytest.param(-1.0),
+        pytest.param(np.nan),
+    ],
+)
+def test_get_precision_for_rounding_fail(ci_width: float) -> None:
+    with pytest.raises(ValueError):
+        _ = get_precision_for_rounding(ci_width)

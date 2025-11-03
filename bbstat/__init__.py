@@ -5,9 +5,14 @@ a resampling method based on the Bayesian interpretation of uncertainty.
 
 Main Features:
     - `bootstrap`: Run the Bayesian bootstrap on compatible data structures.
-    - `BootstrapResult`: Analyze bootstrap outcomes with mean estimates and credibility intervals.
+    - `BootstrapDistribution`: A frozen data class representing the resulting distribution
+      of a bootstrap resampling procedure.
+    - `BootstrapSummary`: A frozen data class that holds the summary (mean, credible interval,
+      and level) of a Bayesian bootstrap procedure's result.
     - `resample`: Generate weighted samples using the Dirichlet distribution.
     - `statistics`: Collection of built-in weighted statistics.
+    - `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
+      and automatically evaluates the credible interval.
 
 Supported Statistic Functions:
     Custom statistic functions must accept the signature:
@@ -42,7 +47,7 @@ Modules:
     - `utils`: Utility functions
 """
 
-from bbstat.evaluate import BootstrapResult
+from bbstat.evaluate import BootstrapDistribution, BootstrapSummary
 from bbstat.resample import resample
 
 from . import statistics, utils
@@ -53,7 +58,8 @@ from .plot import plot
 __all__ = [
     "__version__",
     "bootstrap",
-    "BootstrapResult",
+    "BootstrapDistribution",
+    "BootstrapSummary",
     "plot",
     "resample",
     "statistics",
