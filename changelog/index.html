@@ -85,6 +85,10 @@
             
             <li class="nav-item" data-bs-level="1"><a href="#changelog" class="nav-link">Changelog</a>
               <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#011-2025-11-03" class="nav-link">[0.1.1] - 2025-11-03</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-bs-level="2"><a href="#010-2025-10-27" class="nav-link">[0.1.0] - 2025-10-27</a>
               <ul class="nav flex-column">
               </ul>
@@ -98,11 +102,31 @@
 
 <h1 id="changelog">Changelog</h1>
 <p>All notable changes to this project are documented here.</p>
-<!-- ## Unreleased -->
+<!-- ## [Unreleased] -->
 
+<h2 id="011-2025-11-03">[0.1.1] - 2025-11-03</h2>
+<h3 id="added">Added</h3>
+<ul>
+<li><code>bbstat.evaluate.BootstrapSummary</code>: summarises a bootstraped distribution of estimates.</li>
+<li><code>bbstat.evaluate.BootstrapDistribution</code>: container for a bootstraped distribution of estimates as replacement for <code>bbstat.evaluate.BootstrapResult</code>.</li>
+<li><code>bbstat.plot.plot</code> uses a new optional parameter <code>precision</code> to control rounding.</li>
+</ul>
+<h3 id="changed">Changed</h3>
+<ul>
+<li>Moved <code>bbstat.evaluate.BootstrapResult.ndigits</code> to <code>bbstat.utils.get_precision_for_rounding</code> and changed parameter from interval bounds to width.</li>
+<li>Moved <code>bbstat.evaluate.credibility_interval</code> to <code>bbstat.utils.compute_credibility_interval</code>.</li>
+<li>Moved <code>bbstat.evaluate.BootstrapResult.plot</code> to <code>bbstat.plot.plot</code>.</li>
+<li>Renamed all instances "credibility" -&gt; "credible" and "coverage" -&gt; "level".</li>
+<li><code>bbstat.bootstrap.bootstrap</code> returns <code>bbstat.evaluate.BootstrapDistribution</code>.</li>
+<li><code>bbstat.plot.plot</code> expects <code>boostrap_distribution: bbstat.evaluate.BootstrapDistribution</code> as as first and <code>level: float</code> as (no longer optional) second parameter.</li>
+</ul>
+<h3 id="removed">Removed</h3>
+<ul>
+<li>Removed obsolete <code>bbstat.evaluate.BootstrapResult</code></li>
+</ul>
 <h2 id="010-2025-10-27">[0.1.0] - 2025-10-27</h2>
 <p>Core logic and selected statistic functions.</p>
-<h3 id="added">Added</h3>
+<h3 id="added_1">Added</h3>
 <ul>
 <li>Bayesian bootstrapping function <code>bbstat.bootstrap</code>.</li>
 <li>Dirichlet weights generator <code>bbstat.resample</code>.</li>
