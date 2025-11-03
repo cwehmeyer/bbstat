@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from bbstat.bootstrap import bootstrap
-from bbstat.evaluate import BootstrapResult
+from bbstat.evaluate import BootstrapDistribution
 from bbstat.statistics import FArray, compute_weighted_aggregate
 
 
@@ -26,13 +26,6 @@ def data_random() -> FArray:
     ],
 )
 @pytest.mark.parametrize(
-    "level",
-    [
-        pytest.param(0.1),
-        pytest.param(0.9),
-    ],
-)
-@pytest.mark.parametrize(
     "seed",
     [
         pytest.param(None),
@@ -50,36 +43,37 @@ def data_random() -> FArray:
 def test_bootstrap_constant(
     data_constant: FArray,
     n_boot: int,
-    level: float,
     seed: Optional[int],
     blocksize: Optional[int],
 ) -> None:
-    bootstrap_result = bootstrap(
+    bootstrap_distribution = bootstrap(
         data=data_constant,
         statistic_fn=compute_weighted_aggregate,
         n_boot=n_boot,
-        level=level,
         seed=seed,
         blocksize=blocksize,
     )
-    assert bootstrap_result.n_boot == n_boot
-    assert len(bootstrap_result.estimates) == n_boot
-    assert bootstrap_result.level == level
-    assert bootstrap_result.ci[0] <= bootstrap_result.ci[1]
-    np.testing.assert_allclose(bootstrap_result.mean, 1.0)
-    np.testing.assert_allclose(bootstrap_result.ci, 1.0)
-    np.testing.assert_allclose(bootstrap_result.estimates, 1.0)
+    assert isinstance(bootstrap_distribution, BootstrapDistribution)
+    assert len(bootstrap_distribution) == n_boot
+    summary = bootstrap_distribution.summarize()
+    np.testing.assert_allclose(summary.mean, 1.0)
+    np.testing.assert_allclose(summary.ci_low, 1.0)
+    np.testing.assert_allclose(summary.ci_high, 1.0)
+    np.testing.assert_allclose(bootstrap_distribution.estimates, 1.0)
 
 
 def test_bootstrap_random(data_random: FArray) -> None:
-    bootstrap_result = bootstrap(
+    bootstrap_distribution = bootstrap(
         data=data_random,
         statistic_fn=compute_weighted_aggregate,
         seed=1,
     )
-    assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
-    np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=0.07)
-    np.testing.assert_allclose(bootstrap_result.ci, (-0.05, 0.05), atol=0.07)
+    assert len(bootstrap_distribution) == 1000  # default
+    summary = bootstrap_distribution.summarize()
+    assert summary.ci_low < summary.ci_high
+    np.testing.assert_allclose(summary.mean, 0.0, atol=0.07)
+    np.testing.assert_allclose(summary.ci_low, -0.05, atol=0.07)
+    np.testing.assert_allclose(summary.ci_high, 0.05, atol=0.07)
 
 
 @pytest.mark.parametrize(
@@ -99,13 +93,13 @@ def test_bootstrap_random_single_array(
     name: str,
     fn_kwargs: Dict[str, Any],
 ) -> None:
-    bootstrap_result = bootstrap(
+    bootstrap_distribution = bootstrap(
         data=data_random,
         statistic_fn=name,
         seed=1,
         fn_kwargs=fn_kwargs,
     )
-    assert isinstance(bootstrap_result, BootstrapResult)
+    assert isinstance(bootstrap_distribution, BootstrapDistribution)
 
 
 @pytest.mark.parametrize(
@@ -121,25 +115,27 @@ def test_bootstrap_random_two_arrays(
     name: str,
     fn_kwargs: Dict[str, Any],
 ) -> None:
-    bootstrap_result = bootstrap(
+    bootstrap_distribution = bootstrap(
         data=(np.random.choice(3, size=len(data_random)), data_random),
         statistic_fn=name,
         seed=1,
         fn_kwargs=fn_kwargs,
     )
-    assert isinstance(bootstrap_result, BootstrapResult)
+    assert isinstance(bootstrap_distribution, BootstrapDistribution)
 
 
 def test_bootstrap_random_with_factor(data_random: FArray) -> None:
-    bootstrap_result = bootstrap(
+    bootstrap_distribution = bootstrap(
         data=data_random,
         statistic_fn=compute_weighted_aggregate,
         seed=1,
         fn_kwargs={"factor": len(data_random)},
     )
-    assert bootstrap_result.ci[0] < bootstrap_result.ci[1]
-    np.testing.assert_allclose(bootstrap_result.mean, 0.0, atol=70.0)
-    np.testing.assert_allclose(bootstrap_result.ci, (-50.0, 50.0), atol=70.0)
+    summary = bootstrap_distribution.summarize()
+    assert summary.ci_low < summary.ci_high
+    np.testing.assert_allclose(summary.mean, 0.0, atol=70.0)
+    np.testing.assert_allclose(summary.ci_low, -50.0, atol=70.0)
+    np.testing.assert_allclose(summary.ci_high, 50.0, atol=70.0)
 
 
 @pytest.mark.parametrize(

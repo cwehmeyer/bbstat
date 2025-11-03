@@ -29,7 +29,9 @@ This section documents the public API of the `bbstat` package.
     options:
       show_source: true
       members:
+        - BootstrapDistribution
         - BootstrapResult
+        - BootstrapSummary
 
 ---
 

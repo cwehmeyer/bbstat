@@ -22,8 +22,9 @@ Example:
     import numpy as np
     from bbstat.bootstrap import bootstrap
     data = np.random.randn(100)
-    result = bootstrap(data, statistic_fn="mean")
-    print(result)
+    distribution = bootstrap(data, statistic_fn="mean")
+    print(distribution)
+    print(distribution.summarize())
     ```
 
 See the function-level docstring of `bootstrap` for full details.
@@ -33,7 +34,7 @@ from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 
-from .evaluate import BootstrapResult
+from .evaluate import BootstrapDistribution
 from .registry import get_statistic_fn
 from .resample import resample
 
@@ -44,17 +45,15 @@ def bootstrap(
     data: Any,
     statistic_fn: Union[str, Callable],
     n_boot: int = 1000,
-    level: float = 0.87,
     seed: Optional[int] = None,
     blocksize: Optional[int] = None,
     fn_kwargs: Optional[Dict[str, Any]] = None,
-) -> BootstrapResult:
+) -> BootstrapDistribution:
     """
-    Performs Bayesian bootstrap resampling to estimate a statistic and its credible interval.
+    Performs Bayesian bootstrap resampling to estimate a statistic.
 
     This function performs Bayesian bootstrap resampling by generating `n_boot` resamples from
-    the provided `data` and applying the specified statistic function (`statistic_fn`). It then
-    computes the mean and credible interval for the estimated statistic across all resamples.
+    the provided `data` and applying the specified statistic function (`statistic_fn`).
 
     Args:
         data (Any): The data to be resampled. It can be a 1D array, a tuple,
@@ -63,8 +62,6 @@ def bootstrap(
             bootstrap resample. It can either be the name of a registered statistic function or the
             function itself.
         n_boot (int, optional): The number of bootstrap resamples to generate. Default is 1000.
-        level (float, optional): The level for the credible interval (between 0 and 1).
-            Default is 0.87.
         seed (int, optional): A seed for the random number generator to ensure reproducibility.
             Default is `None`, which means no fixed seed.
         blocksize (int, optional): The block size for resampling. If provided, resampling weights
@@ -74,8 +71,7 @@ def bootstrap(
             the `statistic_fn` for each resample. Default is `None`.
 
     Returns:
-        BootstrapResult: An object containing the mean of the resampled statistics, the credible
-            interval, and other details of the bootstrap procedure.
+        BootstrapDistribution: An object containing the array with the resampled statistics.
 
     Raises:
         ValueError: If any data array is not 1D or if the dimensions of the input arrays do not match.
@@ -85,8 +81,8 @@ def bootstrap(
         data = np.random.randn(100)
         statistic_fn = "mean"
         result = bootstrap(data, statistic_fn)
-        print(result.mean)
-        print(result.ci)
+        print(result)
+        print(result.summarize())
         ```
 
     Notes:
@@ -96,8 +92,6 @@ def bootstrap(
           itself. If a string is provided, it must match the name of a function in the `statistics.registry`.
         - The function uses the `resample` function to generate bootstrap resamples and apply the statistic
           function to each resample.
-        - The default `level` of 0.87 corresponds to a 87% credible interval, but this can be
-          adjusted as needed.
     """
     if isinstance(data, np.ndarray):
         if data.ndim != 1:
@@ -126,4 +120,4 @@ def bootstrap(
             )
         ]
     )
-    return BootstrapResult(estimates=estimates, level=level)
+    return BootstrapDistribution(estimates=estimates)
