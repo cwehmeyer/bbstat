@@ -4,6 +4,8 @@ This module provides a data structure for interpreting and summarizing the outpu
 Bayesian bootstrap resampling procedures.
 
 Main Features:
+    - `BootstrapDistribution`: A frozen data class representing the resulting distribution
+      of a bootstrap resampling procedure.
     - `BootstrapResult`: A data class that holds bootstrap estimates, computes the mean,
       and automatically evaluates the credible interval.
     - `BootstrapSummary`: A frozen data class that holds the summary (mean, credible interval,
@@ -30,6 +32,7 @@ from .statistics import FArray
 from .utils import compute_credible_interval, get_precision_for_rounding
 
 __all__ = [
+    "BootstrapDistribution",
     "BootstrapResult",
     "BootstrapSummary",
 ]
@@ -162,6 +165,84 @@ class BootstrapSummary:
         mean = np.mean(estimates).item()
         ci_low, ci_high = compute_credible_interval(estimates=estimates, level=level)
         return cls(mean=mean, ci_low=ci_low, ci_high=ci_high, level=level)
+
+
+@dataclass(frozen=True)
+class BootstrapDistribution:
+    """
+    A class representing the resulting distribution of a bootstrap resampling procedure.
+
+    This class stores the distribution resulting from a Bayesian bootstrap analysis,
+    and provides a method to summarize the result.
+
+    Attributes:
+        estimates (FArray): The array of bootstrap resample estimates.
+
+    Methods:
+        __post_init__: Validates and locks the `estimates` attribute.
+        __len__: Returns the length of the `estimates` array.
+        __str__: Returns a string representation of the object.
+        summarize: Returns a `BootstrapSummary` object.
+
+    Raises:
+        ValueError: If `estimates` is not a 1D array or contains NaN values.
+    """
+
+    estimates: FArray
+
+    def __post_init__(self):
+        """
+        Post-initialization method to validate and lock the estimates array.
+
+        Raises:
+            ValueError: If `estimates` is not a 1D array or contains NaN values.
+        """
+        if self.estimates.ndim != 1:
+            raise ValueError(f"Invalid parameter {self.estimates.ndim=}: must be 1.")
+        if len(self.estimates) < 1:
+            raise ValueError("Invalid parameter estimates: must not be empty.")
+        if np.isnan(self.estimates).any():
+            raise ValueError(
+                "Invalid parameter estimates: must not contain NaN values."
+            )
+        estimates_copy = np.array(self.estimates, copy=True)
+        estimates_copy.setflags(write=False)
+        object.__setattr__(self, "estimates", estimates_copy)
+
+    def __len__(self) -> int:
+        """Returns the length of the estimates array."""
+        return len(self.estimates)
+
+    def __str__(self) -> str:
+        """
+        Returns a human-readable string representation of the bootstrap distribution.
+
+        This method formats the mean and size of the bootstrap distribution for display.
+
+        Returns:
+            str: A formatted string representing the bootstrap distribution.
+        """
+        mean = self.summarize().mean
+        size = len(self)
+        return f"BootstrapDistribution({mean=:}, {size=:})"
+
+    def summarize(self, level: float = 0.87) -> BootstrapSummary:
+        """
+        Returns a `BootstrapSummary` object.
+
+        This method is a wrapper for `BootstrapSummary.from_estimates`.
+
+        Args:
+            level (float): The desired level for the credible interval
+                (must be between 0 and 1).
+
+        Returns:
+            BootstrapSummary: the summary object.
+
+        Raises:
+            ValueError: If the `level` is not between 0 and 1.
+        """
+        return BootstrapSummary.from_estimates(self.estimates, level=level)
 
 
 @dataclass

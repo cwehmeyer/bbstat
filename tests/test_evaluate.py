@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from bbstat.evaluate import BootstrapResult, BootstrapSummary
+from bbstat.evaluate import BootstrapDistribution, BootstrapResult, BootstrapSummary
 
 
 @pytest.fixture(scope="module")
@@ -176,3 +176,45 @@ def test_bootstrap_summary_from_estimates_fail(
 ) -> None:
     with pytest.raises(ValueError):
         _ = BootstrapSummary.from_estimates(estimates, level=level)
+
+
+def test_bootstrap_distribution(estimates: NDArray[np.floating]) -> None:
+    bootstrap_distribution = BootstrapDistribution(estimates)
+    assert len(bootstrap_distribution) == len(estimates)
+    assert (
+        str(bootstrap_distribution)
+        == f"BootstrapDistribution(mean={np.mean(estimates)}, size={len(estimates)})"
+    )
+
+
+@pytest.mark.parametrize(
+    "level",
+    [
+        pytest.param(0.2),
+        pytest.param(0.8),
+    ],
+)
+def test_bootstrap_distribution_summarize(
+    estimates: NDArray[np.floating],
+    level: float,
+) -> None:
+    bootstrap_distribution = BootstrapDistribution(estimates)
+    bootstrap_summary = bootstrap_distribution.summarize(level=level)
+    assert isinstance(bootstrap_summary, BootstrapSummary)
+    np.testing.assert_allclose(bootstrap_summary.mean, 0.5)
+    np.testing.assert_allclose(bootstrap_summary.level, level)
+
+
+@pytest.mark.parametrize(
+    "estimates",
+    [
+        pytest.param(np.array([])),
+        pytest.param(np.array([[0.4, 0.5, 0.6]])),
+        pytest.param(np.array([0.4, 0.5, np.nan])),
+    ],
+)
+def test_bootstrap_distribution_fail(
+    estimates: NDArray[np.floating],
+) -> None:
+    with pytest.raises(ValueError):
+        _ = BootstrapDistribution(estimates)

@@ -6,6 +6,7 @@ All notable changes to this project are documented here.
 
 ### Added
 - `bbstat.evaluate.BootstrapSummary`: summarises a bootstraped distribution of estimates.
+- `bbstat.evaluate.BootstrapDistribution`: container for a bootstraped distribution of estimates as replacement for `bbstat.evaluate.BootstrapResult`.
 
 ### Changed
 - Moved `bbstat.evaluate.BootstrapResult.ndigits` to `bbstat.utils.get_precision_for_rounding` and changed parameter from interval bounds to width.
