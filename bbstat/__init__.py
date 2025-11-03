@@ -7,7 +7,6 @@ Main Features:
     - `bootstrap`: Run the Bayesian bootstrap on compatible data structures.
     - `BootstrapDistribution`: A frozen data class representing the resulting distribution
       of a bootstrap resampling procedure.
-    - `BootstrapResult`: Analyze bootstrap outcomes with mean estimates and credible intervals.
     - `BootstrapSummary`: A frozen data class that holds the summary (mean, credible interval,
       and level) of a Bayesian bootstrap procedure's result.
     - `resample`: Generate weighted samples using the Dirichlet distribution.
@@ -48,7 +47,7 @@ Modules:
     - `utils`: Utility functions
 """
 
-from bbstat.evaluate import BootstrapDistribution, BootstrapResult, BootstrapSummary
+from bbstat.evaluate import BootstrapDistribution, BootstrapSummary
 from bbstat.resample import resample
 
 from . import statistics, utils
@@ -60,7 +59,6 @@ __all__ = [
     "__version__",
     "bootstrap",
     "BootstrapDistribution",
-    "BootstrapResult",
     "BootstrapSummary",
     "plot",
     "resample",

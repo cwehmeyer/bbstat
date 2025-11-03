@@ -17,6 +17,9 @@ All notable changes to this project are documented here.
 - `bbstat.bootstrap.bootstrap` returns `bbstat.evaluate.BootstrapDistribution`.
 - `bbstat.plot.plot` expects `boostrap_distribution: bbstat.evaluate.BootstrapDistribution` as as first and `level: float` as (no longer optional) second parameter.
 
+### Removed
+- Removed obsolete `bbstat.evaluate.BootstrapResult`
+
 ## [0.1.0] - 2025-10-27
 Core logic and selected statistic functions.
 
