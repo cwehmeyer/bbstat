@@ -2,7 +2,9 @@
 
 All notable changes to this project are documented here.
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## [0.1.1] - 2025-11-03
 
 ### Added
 - `bbstat.evaluate.BootstrapSummary`: summarises a bootstraped distribution of estimates.
