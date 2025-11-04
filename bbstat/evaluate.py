@@ -25,7 +25,7 @@ Notes:
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional, Union
 
 import numpy as np
 
@@ -106,22 +106,32 @@ class BootstrapSummary:
         """Returns the width of the credible interval."""
         return self.ci_high - self.ci_low
 
-    def round(self, precision: Optional[int] = None) -> "BootstrapSummary":
+    def round(
+        self,
+        precision: Union[int, Literal["auto"]] = "auto",
+    ) -> "BootstrapSummary":
         """
         Returns a new version of the summary with rounded values.
 
         When `precision` is given, the mean and credible interval bounds are rounded
-        to this number of digits. If `precision=None` (default), the precision is
-        computed form the width of the credible interval.
+        to this number of digits. If `precision="auto"` (default), the precision is
+        computed from the width of the credible interval.
 
         Args:
-            precision (int, optional): The desired precision for rounding.
+            precision (int or "auto"): The desired precision for rounding. Default is "auto".
 
         Returns:
             BootstrapSummary: The summary of a Bayesian bootstrap procedure's result.
+
+        Raises:
+            ValueError: If `precision` is not integer or "auto".
         """
-        if precision is None:
+        if precision == "auto":
             precision = get_precision_for_rounding(self.ci_width)
+        elif not isinstance(precision, int):
+            raise ValueError(
+                f"Invalid parameter {precision=:}: must be integer or 'auto'."
+            )
         return self.__class__(
             mean=round(self.mean, precision),
             ci_low=round(self.ci_low, precision),
@@ -226,20 +236,32 @@ class BootstrapDistribution:
         size = len(self)
         return f"BootstrapDistribution({mean=:}, {size=:})"
 
-    def summarize(self, level: float = 0.87) -> BootstrapSummary:
+    def summarize(
+        self,
+        level: float = 0.87,
+        precision: Optional[Union[int, Literal["auto"]]] = None,
+    ) -> BootstrapSummary:
         """
         Returns a `BootstrapSummary` object.
 
-        This method is a wrapper for `BootstrapSummary.from_estimates`.
+        This method is a wrapper for `BootstrapSummary.from_estimates`. If `precision=None`
+        (default), the summary is returned without rounding. If `precision="auto"`
+        (or integer-valued), the summary is rounded.
 
         Args:
             level (float): The desired level for the credible interval
                 (must be between 0 and 1).
+            precision (int or "auto" or None): The desired precision for rounding.
+                Default is None.
 
         Returns:
             BootstrapSummary: the summary object.
 
         Raises:
             ValueError: If the `level` is not between 0 and 1.
+            ValueError: If `precision` is not integer or "auto" or None.
         """
-        return BootstrapSummary.from_estimates(self.estimates, level=level)
+        summary = BootstrapSummary.from_estimates(self.estimates, level=level)
+        if precision is None:
+            return summary
+        return summary.round(precision)
