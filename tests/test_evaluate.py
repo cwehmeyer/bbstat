@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Union
 
 import numpy as np
 import pytest
@@ -65,11 +65,11 @@ def test_bootstrap_summary_ci_width(
         pytest.param(1, 0.5, 0.1, 0.9),
         pytest.param(2, 0.51, 0.11, 0.91),
         pytest.param(3, 0.511, 0.111, 0.911),
-        pytest.param(None, 0.51, 0.11, 0.91),
+        pytest.param("auto", 0.51, 0.11, 0.91),
     ],
 )
 def test_bootstrap_summary_round(
-    precision: Optional[int],
+    precision: Union[int, Literal["auto"]],
     expected_mean: float,
     expected_ci_low: float,
     expected_ci_high: float,
@@ -88,6 +88,12 @@ def test_bootstrap_summary_round(
     np.testing.assert_allclose(bootstrap_summary_rounded.mean, expected_mean)
     np.testing.assert_allclose(bootstrap_summary_rounded.ci_low, expected_ci_low)
     np.testing.assert_allclose(bootstrap_summary_rounded.ci_high, expected_ci_high)
+
+
+def test_bootstrap_summary_round_fail() -> None:
+    bootstrap_summary = BootstrapSummary(mean=0.5, ci_low=0.1, ci_high=0.9, level=0.87)
+    with pytest.raises(ValueError):
+        _ = bootstrap_summary.round(precision="not-auto")  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(

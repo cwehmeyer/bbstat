@@ -25,7 +25,7 @@ Notes:
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Union
 
 import numpy as np
 
@@ -106,22 +106,32 @@ class BootstrapSummary:
         """Returns the width of the credible interval."""
         return self.ci_high - self.ci_low
 
-    def round(self, precision: Optional[int] = None) -> "BootstrapSummary":
+    def round(
+        self,
+        precision: Union[int, Literal["auto"]] = "auto",
+    ) -> "BootstrapSummary":
         """
         Returns a new version of the summary with rounded values.
 
         When `precision` is given, the mean and credible interval bounds are rounded
-        to this number of digits. If `precision=None` (default), the precision is
-        computed form the width of the credible interval.
+        to this number of digits. If `precision="auto"` (default), the precision is
+        computed from the width of the credible interval.
 
         Args:
-            precision (int, optional): The desired precision for rounding.
+            precision (int or "auto"): The desired precision for rounding. Default is "auto".
 
         Returns:
             BootstrapSummary: The summary of a Bayesian bootstrap procedure's result.
+
+        Raises:
+            ValueError: If `precision` is not integer or "auto".
         """
-        if precision is None:
+        if precision == "auto":
             precision = get_precision_for_rounding(self.ci_width)
+        elif not isinstance(precision, int):
+            raise ValueError(
+                f"Invalid parameter {precision=:}: must be integer or 'auto'."
+            )
         return self.__class__(
             mean=round(self.mean, precision),
             ci_low=round(self.ci_low, precision),
