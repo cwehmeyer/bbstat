@@ -45,5 +45,6 @@ extra_javascript:
 
 nav:
   - Home: index.md
+  - Getting started: getting_started.md
   - API Reference: reference.md
   - Changelog: changelog.md
