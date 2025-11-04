@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pytest
@@ -151,7 +151,7 @@ def test_bootstrap_distribution(estimates: NDArray[np.floating]) -> None:
         pytest.param(0.8),
     ],
 )
-def test_bootstrap_distribution_summarize(
+def test_bootstrap_distribution_summarize_level(
     estimates: NDArray[np.floating],
     level: float,
 ) -> None:
@@ -160,6 +160,26 @@ def test_bootstrap_distribution_summarize(
     assert isinstance(bootstrap_summary, BootstrapSummary)
     np.testing.assert_allclose(bootstrap_summary.mean, 0.5)
     np.testing.assert_allclose(bootstrap_summary.level, level)
+
+
+@pytest.mark.parametrize(
+    "precision",
+    [
+        pytest.param(0),
+        pytest.param(1),
+        pytest.param("auto"),
+    ],
+)
+def test_bootstrap_distribution_summarize_precision(
+    estimates: NDArray[np.floating],
+    precision: Optional[Union[int, Literal["auto"]]],
+) -> None:
+    bootstrap_distribution = BootstrapDistribution(estimates)
+    summary0 = bootstrap_distribution.summarize()
+    summary1 = bootstrap_distribution.summarize(precision=precision)
+    if precision is not None:
+        summary0 = summary0.round(precision)
+    assert summary0 == summary1
 
 
 @pytest.mark.parametrize(

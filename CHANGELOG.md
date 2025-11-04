@@ -4,6 +4,9 @@ All notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+- `BootstrapDistribution.summarize` has new parameter `precision: Optional[Union[int, Literal["auto"]]] = None` to control rounding behaviour.
+
 ### Changed
 - `BootstrapSummary.round` parameter `precision` now defaults to `Literal["auto"]`.
 

@@ -43,6 +43,14 @@ print(summary.round())
 # BootstrapSummary(mean=2.6, ci_low=2.1, ci_high=3.2, level=0.95)
 ```
 
+Additionally, you can specify the precision in `BootstrapDistribution.summarize`:
+
+```python
+summary = distribution.summarize(level=0.95, precision="auto")
+print(summary)
+# BootstrapSummary(mean=2.6, ci_low=2.1, ci_high=3.2, level=0.95)
+```
+
 Here the mean estimate is about 2.6 cups per day, with a 95% credible interval of roughly [2.1, 3.2]. The uncertainty reflects variation in the weights each sample could have in the population, not in resampled data points.
 
 ## Bootstrapping a quantile
@@ -79,7 +87,7 @@ data = (study_hours, exam_scores)
 
 # Weighted Pearson correlation via Bayesian bootstrapping
 distribution = bootstrap(data=data, statistic_fn="pearson_dependency", n_boot=2000, seed=1)
-summary = distribution.summarize(level=0.95).round()
+summary = distribution.summarize(level=0.95, precision="auto")
 print(summary)
 # BootstrapSummary(mean=0.9969, ci_low=0.9911, ci_high=0.9992, level=0.95)
 ```
@@ -133,7 +141,7 @@ def weighted_geometric_mean(data, weights):
 
 data = np.array([1.2, 1.5, 2.0, 2.8, 3.1])
 distribution = bootstrap(data=data, statistic_fn=weighted_geometric_mean, n_boot=1500, seed=1)
-summary = distribution.summarize().round()
+summary = distribution.summarize(precision="auto")
 print(summary)
 # BootstrapSummary(mean=2.01, ci_low=1.58, ci_high=2.48, level=0.87)
 ```

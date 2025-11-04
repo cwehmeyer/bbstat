@@ -90,7 +90,8 @@ Performs Bayesian bootstrapping on `data` using the given statistic.
 A `BootstrapDistribution` object with:
 
 - `.estimates`: array of bootstrapped statistic values
-- `.summarize(level)`: returns a `BootstrapSummary` with `mean`, `ci_low`, `ci_high`, and `level`
+- `.summarize(level, precision)`: returns a `BootstrapSummary` with `mean`, `ci_low`, `ci_high`,
+  and `level`; rounded if `precision` is integer-valued or `"auto"`
 
 ### Weighted statistic functions included
 

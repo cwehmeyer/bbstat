@@ -25,7 +25,7 @@ Notes:
 """
 
 from dataclasses import dataclass
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 
@@ -236,20 +236,32 @@ class BootstrapDistribution:
         size = len(self)
         return f"BootstrapDistribution({mean=:}, {size=:})"
 
-    def summarize(self, level: float = 0.87) -> BootstrapSummary:
+    def summarize(
+        self,
+        level: float = 0.87,
+        precision: Optional[Union[int, Literal["auto"]]] = None,
+    ) -> BootstrapSummary:
         """
         Returns a `BootstrapSummary` object.
 
-        This method is a wrapper for `BootstrapSummary.from_estimates`.
+        This method is a wrapper for `BootstrapSummary.from_estimates`. If `precision=None`
+        (default), the summary is returned without rounding. If `precision="auto"`
+        (or integer-valued), the summary is rounded.
 
         Args:
             level (float): The desired level for the credible interval
                 (must be between 0 and 1).
+            precision (int or "auto" or None): The desired precision for rounding.
+                Default is None.
 
         Returns:
             BootstrapSummary: the summary object.
 
         Raises:
             ValueError: If the `level` is not between 0 and 1.
+            ValueError: If `precision` is not integer or "auto" or None.
         """
-        return BootstrapSummary.from_estimates(self.estimates, level=level)
+        summary = BootstrapSummary.from_estimates(self.estimates, level=level)
+        if precision is None:
+            return summary
+        return summary.round(precision)
