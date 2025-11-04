@@ -2,7 +2,7 @@ site_name: bbstat
 site_url: https://cwehmeyer.github.io/bbstat/
 repo_url: https://github.com/cwehmeyer/bbstat/
 theme:
-  name: mkdocs
+  name: material
   features:
     - navigation.tabs
     - navigation.sections
@@ -10,6 +10,16 @@ theme:
     - search.highlight
     - search.suggest
     - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: amber
+    - scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
 
 plugins:
   - search
@@ -17,7 +27,24 @@ plugins:
   - mkdocstrings:
       default_handler: python
 
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
 nav:
   - Home: index.md
+  - Getting started: getting_started.md
   - API Reference: reference.md
   - Changelog: changelog.md
