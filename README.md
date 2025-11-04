@@ -15,9 +15,9 @@ This package implements the core logic of Bayesian bootstrapping in Python, alon
 
 ## Why use this package?
 
-Learn and experiment with Bayesian bootstrap inference in Python
-Quickly compute posterior-like uncertainty intervals for arbitrary statistics
-Extend easily with your own weighted statistic functions
+- Learn and experiment with Bayesian bootstrap inference in Python
+- Quickly compute posterior-like uncertainty intervals for arbitrary statistics
+- Extend easily with your own weighted statistic functions
 
 ## Installation
 
