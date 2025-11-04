@@ -2,16 +2,27 @@
 name = "bbstat"
 dynamic = ["version"]
 authors = [{ name="Chris Wehmeyer", email="wehmeyer.chris@gmail.com" }]
-description = "A lightweight library for Bayesian bootstrapping and statistical evaluation."
+description = "Lightweight Python library for learning and exploring Bayesian bootstrapping."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-keywords = ["bayesian", "bootstrap", "statistics"]
+keywords = [
+  "bayesian",
+  "bootstrap",
+  "statistics",
+  "uncertainty",
+  "nonparametric",
+  "education"
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent"
 ]
 dependencies = [
     "matplotlib",
