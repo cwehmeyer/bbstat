@@ -66,10 +66,7 @@ def plot(
     summary = bootstrap_distribution.summarize(level)
 
     if precision is not None:
-        if precision == "auto":
-            summary = summary.round()
-        else:
-            summary = summary.round(precision)
+        summary = summary.round(precision)
 
     param_str = f"{summary.mean} ({summary.ci_low}, {summary.ci_high})"
 
