@@ -30,7 +30,9 @@ Example:
 See the function-level docstring of `bootstrap` for full details.
 """
 
-from typing import Any, Callable, Dict, Optional, Union
+import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Callable, Dict, Optional, Union, cast
 
 import numpy as np
 
@@ -70,6 +72,7 @@ def bootstrap(
     n_boot: int = 1000,
     seed: Optional[int] = None,
     blocksize: Optional[int] = None,
+    n_jobs: Optional[int] = None,
     fn_kwargs: Optional[Dict[str, Any]] = None,
 ) -> BootstrapDistribution:
     """
@@ -90,6 +93,10 @@ def bootstrap(
         blocksize (int, optional): The block size for resampling. If provided, resampling weights
             are generated in blocks of this size. Defaults to `None`, meaning all resampling weights
             are generated at once.
+        n_jobs (int, optional):  Number of worker threads for parallel computation.
+            If `None` (default), `0`, or `1`, the computation runs serially.
+            A positive integer requests that many threads.
+            A negative integer (e.g., `-1`) uses all available CPU cores.
         fn_kwargs (Dict[str, Any], optional): Additional keyword arguments to be passed to
             the `statistic_fn` for each resample. Default is `None`.
 
@@ -132,13 +139,36 @@ def bootstrap(
 
     if isinstance(statistic_fn, str):
         statistic_fn = get_statistic_fn(statistic_fn)
-    estimates = _bootstrap_worker(
-        data=data,
-        statistic_fn=statistic_fn,
-        n_data=n_data,
-        n_boot=n_boot,
-        seed=seed,
-        blocksize=blocksize,
-        fn_kwargs=fn_kwargs,
-    )
+    if n_jobs is not None and n_jobs <= -1:
+        n_jobs = os.cpu_count()  # may return None
+    n_jobs = cast(int, n_jobs or 1)  # map cases 0 and None to serial behavior
+    if n_jobs == 1:
+        estimates = _bootstrap_worker(
+            data=data,
+            statistic_fn=statistic_fn,
+            n_data=n_data,
+            n_boot=n_boot,
+            seed=seed,
+            blocksize=blocksize,
+            fn_kwargs=fn_kwargs,
+        )
+    else:
+        chunk_size = int(np.ceil(n_boot / n_jobs))
+        seeds = np.random.SeedSequence(seed).spawn(n_jobs)
+        with ThreadPoolExecutor(max_workers=n_jobs) as ex:
+            futures = [
+                ex.submit(
+                    _bootstrap_worker,
+                    data,
+                    statistic_fn,
+                    n_data,
+                    min(chunk_size, n_boot - i * chunk_size),
+                    int(child_seed.generate_state(1)[0]),
+                    blocksize,
+                    fn_kwargs,
+                )
+                for i, child_seed in enumerate(seeds)
+                if i * chunk_size < n_boot
+            ]
+            estimates = np.concatenate([f.result() for f in as_completed(futures)])
     return BootstrapDistribution(estimates=estimates)
