@@ -69,13 +69,6 @@ print(summary.round())  # => BootstrapSummary(mean=52000.0, ci_low=47000.0, ci_h
 
 Performs Bayesian bootstrapping on `data` using the given statistic.
 
-- `data`: 1D NumPy array, or tuple/list thereof
-- `statistic_fn`: string or callable (e.g., `"mean"`, `"median"`, or custom function)
-- `n_boot`: number of bootstrap samples
-- `seed`: random seed (optional)
-- `blocksize`: number of resamples to allocate in one block
-- `fn_kwargs`: optional dictionary with parameters for `statistic_fn`
-
 **Parameters**
 
 - `data`: 1D NumPy array, or tuple/list of arrays
