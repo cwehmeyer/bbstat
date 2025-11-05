@@ -3,7 +3,7 @@
 This module provides functions to aid interpretation and summarizing the output of
 Bayesian bootstrap resampling procedures. It includes tools to compute credible
 intervals for statistical estimates and gauging the appropriate precision for
-rounding mean and crebilility interval values from the width of the latter.
+rounding mean and credible interval values from the width of the latter.
 
 Main Features:
     - `compute_credible_interval`: Computes a credible interval from a set of estimates.

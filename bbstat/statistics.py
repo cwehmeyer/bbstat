@@ -300,7 +300,7 @@ def compute_weighted_median(
     """
     Computes a weighted median of 1D data using linear interpolation.
 
-    This function calculates the weighted meadian of the given `data` array
+    This function calculates the weighted median of the given `data` array
     based on the provided `weights` via `compute_weighted_quantile` with parameter
     `quantile=0.5`.
 
