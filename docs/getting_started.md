@@ -148,6 +148,38 @@ print(summary)
 
 The same pattern applies if your statistic takes multiple arrays (e.g., (x, y)). The function receives the data and weights, computes its result, and returns a single float.
 
+
+## Parallel Usage
+
+The `bootstrap` function can run in parallel to speed up computation, especially for very large datasets or custom statistics that are expensive to compute. By default, the function runs serially (`n_jobs=None`), which is often fastest for small to medium-sized datasets because parallelisation has overhead.
+
+### Controlling Parallelism
+
+You can control the number of worker threads using the `n_jobs` parameter:
+
+``` python
+# Serial execution (default)
+dist = bootstrap(data, statistic_fn="mean", n_boot=1000)
+
+# Use 4 threads
+dist = bootstrap(data, statistic_fn="mean", n_boot=1000, n_jobs=4)
+
+# Use all available CPU cores
+dist = bootstrap(data, statistic_fn="mean", n_boot=1000, n_jobs=-1)
+```
+
+### Notes:
+
+- If `n_jobs=None`, `0`, or `1`, the job runs serially
+- If `n_jobs` is a positive integer, the job uses that many threads
+- If `n_jobs` is a negative integer, the job uses all available CPU cores
+
+### When Parallelisation Helps
+
+Parallel execution can greatly reduce runtime for large numbers of bootstrap samples or heavy custom statistics, especially if your statistic function performs multiple NumPy operations or other CPU-heavy work. For very small tasks, serial execution is often faster due to the overhead of starting threads.
+
+Use `n_jobs=-1` with caution in CI or shared environments: it will attempt to use all CPU cores, which may affect other tasks.
+
 ## Common questions and pitfalls
 - **Why are the credible intervals sometimes narrow?**
   Bayesian bootstrapping assumes that the observed data already represent the full population support. Uncertainty is only about how much weight each observation should get, not about unseen data. If the sample is small or has heavy tails, results can appear overconfident.
