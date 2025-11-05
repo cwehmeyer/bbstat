@@ -83,6 +83,7 @@ Performs Bayesian bootstrapping on `data` using the given statistic.
 - `n_boot`: number of bootstrap samples
 - `seed`: random seed (optional)
 - `blocksize`: number of resamples processed per block
+- `n_jobs`:  number of worker threads for parallel computation
 - `fn_kwargs`: optional dict of extra parameters for `statistic_fn`
 
 **Returns**

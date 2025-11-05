@@ -77,6 +77,69 @@ def test_bootstrap_random(data_random: FArray) -> None:
 
 
 @pytest.mark.parametrize(
+    "n_jobs",
+    [
+        pytest.param(2),
+        pytest.param(-1),
+    ],
+)
+def test_bootstrap_random_serial_matches_parallel(
+    data_random: FArray, n_jobs: int
+) -> None:
+    distribution_serial = bootstrap(
+        data=data_random,
+        statistic_fn=compute_weighted_aggregate,
+        n_boot=20,
+        seed=1,
+    )
+    distribution_n_jobs = bootstrap(
+        data=data_random,
+        statistic_fn=compute_weighted_aggregate,
+        n_boot=20,
+        seed=1,
+        n_jobs=n_jobs,
+    )
+    assert len(distribution_serial) == len(distribution_n_jobs)
+    summary_serial = distribution_serial.summarize(level=0.95, precision="auto")
+    summary_n_jobs = distribution_n_jobs.summarize(level=0.95, precision="auto")
+    np.testing.assert_allclose(summary_n_jobs.mean, summary_serial.mean, atol=0.02)
+    np.testing.assert_allclose(summary_n_jobs.ci_low, summary_serial.ci_low, atol=0.02)
+    np.testing.assert_allclose(
+        summary_n_jobs.ci_high, summary_serial.ci_high, atol=0.02
+    )
+
+
+@pytest.mark.parametrize(
+    "n_jobs",
+    [
+        pytest.param(2),
+        pytest.param(-1),
+    ],
+)
+def test_bootstrap_random_parallel_reproducible(
+    data_random: FArray, n_jobs: int
+) -> None:
+    distribution0 = bootstrap(
+        data=data_random,
+        statistic_fn=compute_weighted_aggregate,
+        n_boot=20,
+        seed=1,
+        n_jobs=n_jobs,
+    )
+    distribution1 = bootstrap(
+        data=data_random,
+        statistic_fn=compute_weighted_aggregate,
+        n_boot=20,
+        seed=1,
+        n_jobs=n_jobs,
+    )
+    np.testing.assert_allclose(
+        np.sort(distribution0.estimates),
+        np.sort(distribution1.estimates),
+    )
+
+
+@pytest.mark.parametrize(
     "name, fn_kwargs",
     [
         pytest.param("mean", {}),

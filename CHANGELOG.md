@@ -6,6 +6,7 @@ All notable changes to this project are documented here.
 
 ### Added
 - `BootstrapDistribution.summarize` has new parameter `precision: Optional[Union[int, Literal["auto"]]] = None` to control rounding behaviour.
+- `bootstrap` now supports parallelism via ThreadPoolExecutor and has new parameter `n_jobs: Optional[int] = None` to control this behaviour.
 
 ### Changed
 - `BootstrapSummary.round` parameter `precision` now defaults to `Literal["auto"]`.
