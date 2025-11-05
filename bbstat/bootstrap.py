@@ -37,8 +37,31 @@ import numpy as np
 from .evaluate import BootstrapDistribution
 from .registry import get_statistic_fn
 from .resample import resample
+from .statistics import FArray
 
 __all__ = ["bootstrap"]
+
+
+def _bootstrap_worker(
+    data: Any,
+    statistic_fn: Callable,
+    n_data: int,
+    n_boot: int,
+    seed: Optional[int],
+    blocksize: Optional[int],
+    fn_kwargs: Optional[Dict[str, Any]],
+) -> FArray:
+    return np.array(
+        [
+            statistic_fn(data=data, weights=weights, **(fn_kwargs or {}))
+            for weights in resample(
+                n_boot=n_boot,
+                n_data=n_data,
+                seed=seed,
+                blocksize=blocksize,
+            )
+        ]
+    )
 
 
 def bootstrap(
@@ -109,15 +132,13 @@ def bootstrap(
 
     if isinstance(statistic_fn, str):
         statistic_fn = get_statistic_fn(statistic_fn)
-    estimates = np.array(
-        [
-            statistic_fn(data=data, weights=weights, **(fn_kwargs or {}))
-            for weights in resample(
-                n_boot=n_boot,
-                n_data=n_data,
-                seed=seed,
-                blocksize=blocksize,
-            )
-        ]
+    estimates = _bootstrap_worker(
+        data=data,
+        statistic_fn=statistic_fn,
+        n_data=n_data,
+        n_boot=n_boot,
+        seed=seed,
+        blocksize=blocksize,
+        fn_kwargs=fn_kwargs,
     )
     return BootstrapDistribution(estimates=estimates)
